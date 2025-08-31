@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Projetos Ativos - Creamidia</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --color-primary: #5b6cff;
+      --color-primary-2: #6c4df5;
+      --bg: #f5f5f5;
+      --card: #ffffff;
+      --muted: #657080;
+      --text: #0b1020;
+      --success: #34c759;
+      --warning: #ffb020;
+      --danger: #ff4d4f;
+      --review: #a259ff;
+      --glass: rgba(0, 0, 0, 0.1);
+      --radius: 12px;
+      --radius-sm: 8px;
+      --shadow: 0 8px 24px rgba(11,16,32,0.06);
+      --shadow-sm: 0 4px 12px rgba(11,16,32,0.04);
+      --ui-gap: 16px;
+      --filter-text: #5b6cff; /* Nova cor para os filtros */
+    }
+
+    [data-theme="dark"] {
+      --bg: #100d12;
+      --card: #151117;
+      --muted: #9aa0aa;
+      --text: #f3f4f6;
+      --glass: rgba(255,255,255,0.03);
+      --shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+      --shadow-sm: 0 4px 14px rgba(0, 0, 0, 0.486);
+      --filter-text: #8e9dff; /* Cor mais clara para dark mode */
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      font-family: 'Inter', system-ui, Segoe UI, Roboto, Arial;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      transition: background 0.25s, color 0.25s;
+    }
+
+    .app {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 260px;
+      padding: 24px;
+      background: var(--card);
+      border-right: 1px solid rgba(11,16,32,0.04);
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: auto;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand img { height: 36px; }
+    .brand .title { font-weight: 700; color: var(--color-primary-2); }
+
+    .nav {
+      list-style: none;
+      padding: 0;
+      margin: 8px 0 0 0;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .nav a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px;
+      border-radius: 10px;
+      color: var(--muted);
+      text-decoration: none;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+    .nav a.active {
+      background: linear-gradient(90deg, rgba(107,95,255,0.09), rgba(92,108,255,0.03));
+      color: var(--color-primary-2);
+    }
+    .nav a:hover { background: rgba(107,95,255,0.05); }
+
+    .main { flex: 1; padding: 24px; overflow: auto; }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .page-title { font-size: 20px; font-weight: 700; }
+
+    .header-actions { display: flex; align-items: center; gap: 12px; }
+    .search {
+      display: flex;
+      align-items: center;
+      background: var(--card);
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(11,16,32,0.04);
+      gap: 8px;
+      box-shadow: var(--shadow-sm);
+      transition: border 0.2s;
+    }
+    .search input { border: 0; outline: 0; background: transparent; width: 260px; color: var(--text); }
+    .search:hover { border-color: var(--color-primary); }
+
+    .theme-btn {
+      background: transparent;
+      border: 1px solid rgba(11,16,32,0.04);
+      padding: 8px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .theme-btn:hover { background: rgba(107,95,255,0.05); }
+
+    .card {
+      background: var(--card);
+      padding: 20px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(11,16,32,0.04);
+      transition: transform 0.2s, box-shadow 0.2s;
+      margin-bottom: 24px;
+    }
+    .card:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(11,16,32,0.08); }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(11,16,32,0.04);
+    }
+    .section-title { font-size: 16px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+
+    .filterbar {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      background: var(--card);
+      padding: 12px;
+      border-radius: var(--radius);
+      border: 1px solid rgba(11,16,32,0.04);
+      box-shadow: var(--shadow-sm);
+      flex-wrap: wrap;
+      transition: box-shadow 0.2s;
+      margin-bottom: 24px;
+    }
+    .filterbar:hover { box-shadow: 0 6px 16px rgba(11,16,32,0.06); }
+    .filterbar .select {
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(11,16,32,0.06);
+      background: var(--card);
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 600;
+      transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+      cursor: pointer;
+      min-width: 200px;
+      appearance: none;
+      background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2212%22%20height%3D%228%22%20viewBox%3D%220%200%2012%208%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M1%201L6%206L11%201%22%20stroke%3D%22%23657080%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E');
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+    }
+    .filterbar .select:hover {
+      border-color: var(--color-primary);
+      transform: scale(1.02);
+    }
+    .filterbar .select:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 2px rgba(92,108,255,0.2);
+    }
+
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+    .project-card {
+      padding: 20px;
+      border-radius: var(--radius);
+      background: var(--card);
+      box-shadow: var(--shadow);
+      color: var(--text);
+      transition: transform 0.2s, box-shadow 0.2s;
+      border: 1px solid rgba(11,16,32,0.04);
+      display: flex;
+      flex-direction: column;
+    }
+    .project-card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(11,16,32,0.1); }
+    .project-card-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    .project-avatar {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 18px;
+      color: white;
+      background: linear-gradient(135deg, var(--color-primary-2), var(--color-primary));
+      overflow: hidden;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .project-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .project-info {
+      flex: 1;
+    }
+    .project-name {
+      font-weight: 800;
+      margin-bottom: 6px;
+      font-size: 18px;
+      letter-spacing: -0.02em;
+    }
+    .project-count {
+      font-size: 13px;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 500;
+    }
+    .project-chart-container {
+      position: relative;
+      height: 180px;
+      margin-bottom: 20px;
+      margin-top: 10px;
+    }
+    .project-status {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .status-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      padding: 6px 8px;
+      border-radius: 6px;
+      background: rgba(11,16,32,0.02);
+    }
+    .status-color {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .status-andamento { background-color: var(--color-primary); }
+    .status-atrasado { background-color: var(--danger); }
+    .status-revisao { background-color: var(--review); }
+    .status-entregue { background-color: var(--success); }
+    .project-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: auto;
+    }
+    .btn {
+      padding: 10px 16px;
+      border-radius: 8px;
+      border: 0;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn.primary { 
+      background: var(--color-primary); 
+      color: white; 
+      box-shadow: 0 4px 10px rgba(91, 108, 255, 0.3);
+    }
+    .btn.primary:hover { box-shadow: 0 6px 14px rgba(91, 108, 255, 0.4); }
+    .btn.ghost { 
+      background: transparent; 
+      border: 1px solid rgba(11,16,32,0.08); 
+      color: var(--muted);
+    }
+    .btn.ghost:hover { 
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+      background: rgba(91, 108, 255, 0.05);
+    }
+
+    .muted { color: var(--muted); }
+    .flex { display: flex; gap: 8px; align-items: center; }
+
+    /* Barra de progresso melhorada */
+    .progress-container {
+      margin: 20px 0;
+      padding: 12px 0;
+      border-top: 1px solid rgba(11,16,32,0.06);
+      border-bottom: 1px solid rgba(11,16,32,0.06);
+    }
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .progress-bar {
+      height: 8px;
+      background-color: rgba(11,16,32,0.08);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      border-radius: 10px;
+      background: linear-gradient(90deg, var(--color-primary), var(--color-primary-2));
+      transition: width 0.5s ease;
+      box-shadow: 0 0 10px rgba(91, 108, 255, 0.4);
+    }
+
+    /* Modal de detalhes */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .modal-content {
+      background-color: var(--card);
+      border-radius: var(--radius);
+      width: 100%;
+      max-width: 900px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+      animation: modalFadeIn 0.3s ease;
+    }
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .modal-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid rgba(11,16,32,0.06);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-title {
+      font-size: 20px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .modal-close {
+      background: transparent;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: var(--muted);
+      padding: 4px 8px;
+      border-radius: 6px;
+    }
+    .modal-close:hover {
+      background: rgba(11,16,32,0.05);
+      color: var(--text);
+    }
+    .modal-body {
+      padding: 24px;
+    }
+    .client-info {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid rgba(11,16,32,0.06);
+    }
+    .client-avatar {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    .client-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .client-details {
+      flex: 1;
+    }
+    .client-name {
+      font-size: 24px;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+    .client-projects {
+      font-size: 16px;
+      color: var(--muted);
+    }
+    .videos-section {
+      margin-top: 24px;
+    }
+    .videos-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .videos-title {
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .videos-filter {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .filter-btn {
+      padding: 6px 12px;
+      border-radius: 20px;
+      border: 1px solid rgba(11,16,32,0.1);
+      background: transparent;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: var(--filter-text); /* Aplicando a nova cor */
+      font-weight: 600; /* Deixando a fonte mais destacada */
+    }
+    .filter-btn.active, .filter-btn:hover {
+      background: var(--color-primary);
+      color: white;
+      border-color: var(--color-primary);
+    }
+    .videos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 16px;
+    }
+    .video-card {
+      padding: 16px;
+      border-radius: var(--radius-sm);
+      background: rgba(11,16,32,0.02);
+      border: 1px solid rgba(11,16,32,0.06);
+      transition: all 0.2s;
+    }
+    .video-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(11,16,32,0.08);
+    }
+    .video-id {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 8px;
+      font-family: monospace;
+    }
+    .video-title {
+      font-weight: 600;
+      margin-bottom: 12px;
+      font-size: 15px;
+    }
+    .video-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .status-andamento-badge { background: rgba(91, 108, 255, 0.1); color: var(--color-primary); }
+    .status-atrasado-badge { background: rgba(255, 77, 79, 0.1); color: var(--danger); }
+    .status-revisao-badge { background: rgba(162, 89, 255, 0.1); color: var(--review); }
+    .status-entregue-badge { background: rgba(52, 199, 89, 0.1); color: var(--success); }
+
+    @media (max-width: 1024px) {
+      .sidebar { width: 88px; padding: 12px; }
+      .nav a span { display: none; }
+      .brand .title { display: none; }
+      .search input { width: 120px; }
+      .projects-grid { grid-template-columns: 1fr; }
+      .filterbar { flex-direction: column; align-items: stretch; }
+      .filterbar .select { min-width: 100%; }
+    }
+    @media (max-width: 720px) {
+      .app { flex-direction: column; }
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        border-right: 0;
+        border-bottom: 1px solid rgba(11,16,32,0.04);
+      }
+      .main { padding: 16px; }
+      .project-status { grid-template-columns: 1fr; }
+      .videos-grid { grid-template-columns: 1fr; }
+      .client-info { flex-direction: column; text-align: center; }
+    }
+  </style>
+</head>
+<body data-theme="light">
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <img src="https://www.creamidia.com.br/images/about/logo-about.svg" alt="logo">
+        <div>
+          <div class="title">Creamidia</div>
+          <div class="muted" style="font-size:12px">Painel de Gestão</div>
+        </div>
+      </div>
+      <ul class="nav">
+        <li><a href="#"><i class="fas fa-th-large"></i><span>Dashboard</span></a></li>
+        <li><a href="#"><i class="fas fa-users"></i><span>Equipe</span></a></li>
+        <li><a href="#" class="active"><i class="fas fa-folder"></i><span>Projetos</span></a></li>
+        <li><a href="#"><i class="fas fa-trophy"></i><span>Ranking</span></a></li>
+        <li><a href="#"><i class="fas fa-cog"></i><span>Configurações</span></a></li>
+      </ul>
+      <div style="margin-top:auto;font-size:12px;color:var(--muted)">Versão alfa • Offline</div>
+    </aside>
+
+    <main class="main">
+      <div class="header">
+        <div style="display:flex;flex-direction:column">
+          <div class="page-title">Projetos Ativos</div>
+          <div class="muted" style="font-size:14px">Gerencia todos os projetos ativos da empresa</div>
+        </div>
+        <div class="header-actions">
+          <div class="search">
+            <i class="fas fa-search muted"></i>
+            <input placeholder="Buscar projeto...">
+          </div>
+          <button class="theme-btn" title="Alternar tema"><i class="fas fa-moon"></i></button>
+          <div class="flex" style="padding:6px 8px;border-radius:10px;background:var(--card);border:1px solid rgba(11,16,32,0.04)">
+            <div class="project-avatar">AD</div>
+            <div style="font-weight:700">Admin</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="filterbar card">
+        <div class="muted">Status:</div>
+        <select class="select">
+          <option selected>Todos os Status</option>
+          <option>Em Andamento</option>
+          <option>Atrasado</option>
+          <option>Em Revisão</option>
+          <option>Entregue</option>
+        </select>
+        
+        <div class="muted">Cliente:</div>
+        <select class="select">
+          <option selected>Todos os Clientes</option>
+          <option>Dragon</option>
+          <option>Devin</option>
+          <option>SJO</option>
+          <option>Maverick</option>
+        </select>
+
+        <div class="muted">Ordenar por:</div>
+        <select class="select">
+          <option selected>Mais Recentes</option>
+          <option>Mais Antigos</option>
+          <option>Mais Projetos</option>
+          <option>Menos Projetos</option>
+        </select>
+      </div>
+
+      <section class="section">
+        <div class="projects-grid">
+          <!-- Card Dragon -->
+          <div class="project-card">
+            <div class="project-card-header">
+              <div class="project-avatar">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT3kpSJlO5QzSZtx7owaEY7Z7dHD_HUargnSA&s" alt="Dragon">
+              </div>
+              <div class="project-info">
+                <div class="project-name">Dragon</div>
+                <div class="project-count"><i class="fas fa-folder-open"></i> 10 PROJETOS ATIVOS</div>
+              </div>
+            </div>
+            <div class="project-chart-container">
+              <canvas id="dragonChart"></canvas>
+            </div>
+            <div class="project-status">
+              <div class="status-item">
+                <div class="status-color status-andamento"></div>
+                <span>Em andamento: <strong id="dragon-andamento">4</strong></span>
+              </div>
+              <div class="status-item">
+                <div class="status-color status-atrasado"></div>
+                <span>Atrasado: <strong id="dragon-atrasado">2</strong></span>
+              </div>
+              <div class="status-item">
+                <div class="status-color status-revisao"></div>
+                <span>Em revisão: <strong id="dragon-revisao">3</strong></span>
+              </div>
+            </div>
+            <div class="progress-container">
+              <div class="progress-info">
+                <span>Progresso total</span>
+                <span>40%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width: 40%"></div>
+              </div>
+            </div>
+            <div class="project-actions">
+              <button class="btn primary view-details" data-client="dragon"><i class="fas fa-eye"></i> Ver detalhes</button>
+              <button class="btn ghost"><i class="fas fa-pen"></i> Editar</button>
+            </div>
+          </div>
+
+          <!-- Card Devin -->
+          <div class="project-card">
+            <div class="project-card-header">
+              <div class="project-avatar">
+                <img src="https://mn2s.com/wp-content/uploads/2022/10/Devin-Caherly.png" alt="Devin">
+              </div>
+              <div class="project-info">
+                <div class="project-name">Devin</div>
+                <div class="project-count"><i class="fas fa-folder-open"></i> 15 PROJETOS ATIVOS</div>
+              </div>
+            </div>
+            <div class="project-chart-container">
+              <canvas id="devinChart"></canvas>
+            </div>
+            <div class="project-status">
+              <div class="status-item">
+                <div class="status-color status-andamento"></div>
+                <span>Em andamento: <strong id="devin-andamento">6</strong></span>
+              </div>
+              <div class="status-item">
+                <div class="status-color status-atrasado"></div>
+                <span>Atrasado: <strong id="devin-atrasado">3</strong></span>
+              </div>
+              <div class="status-item">
+                <div class="status-color status-revisao"></div>
+                <span>Em revisão: <strong id="devin-revisao">4</strong></span>
+              </div>
+            </div>
+            <div class="progress-container">
+              <div class="progress-info">
+                <span>Progresso total</span>
+                <span>53%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width: 53%"></div>
+              </div>
+            </div>
+            <div class="project-actions">
+              <button class="btn primary view-details" data-client="devin"><i class="fas fa-eye"></i> Ver detalhes</button>
+              <button class="btn ghost"><i class="fas fa-pen"></i> Editar</button>
+            </div>
+          </div>
+
+          <!-- Card SJO -->
+          <div class="project-card">
+            <div class="project-card-header">
+              <div class="project-avatar">
+                <img src="https://static.wikia.nocookie.net/youtube/images/3/34/SJohnsonVoiceOvers.jpg/revision/latest?cb=20241203170345" alt="SJO">
+              </div>
+              <div class="project-info">
+                <div class="project-name">SJO</div>
+                <div class="project-count"><i class="fas fa-folder-open"></i> 45 PROJETOS ATIVOS</div>
+              </div>
+            </div>
+            <div class="project-chart-container">
+              <canvas id="sjoChart"></canvas>
+            </div>
+            <div class="project-status">
+              <div class="status-item">
+                <div class="status-color status-andamento"></div>
+                <span>Em andamento: <strong id="sjo-andamento">18</strong></span>
+              </div>
+              <div class="status-item">
+                <div class="status-color status-atrasado"></div>
+                <span>Atrasado: <strong id="sjo-atrasado">9</strong></span>
+              </div>
+              <div class="status-item">
+                <div class="status-color status-revisao"></div>
+                <span>Em revisão: <strong id="sjo-revisao">12</strong></span>
+              </div>
+            </div>
+            <div class="progress-container">
+              <div class="progress-info">
+                <span>Progresso total</span>
+                <span>40%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width: 40%"></div>
+              </div>
+            </div>
+            <div class="project-actions">
+              <button class="btn primary view-details" data-client="sjo"><i class="fas fa-eye"></i> Ver detalhes</button>
+              <button class="btn ghost"><i class="fas fa-pen"></i> Editar</button>
+            </div>
+          </div>
+
+          <!-- Card Maverick -->
+          <div class="project-card">
+            <div class="project-card-header">
+              <div class="project-avatar">
+                <img src="https://images.contactout.com/profiles/a8114a4e6209e8621d54f39a7b109d2a" alt="Maverick">
+              </div>
+              <div class="project-info">
+                <div class="project-name">Maverick</div>
+                <div class="project-count"><i class="fas fa-folder-open"></i> 55 PROJETOS ATIVOS</div>
+              </div>
+            </div>
+            <div class="project-chart-container">
+              <canvas id="maverickChart"></canvas>
+            </div>
+            <div class="project-status">
+              <div class="status-item">
+                <div class="status-color status-andamento"></div>
+                <span>Em andamento: <strong id="maverick-andamento">22</strong></span>
+              </div>
+              <div class="status-item">
+                <div class="status-color status-atrasado"></div>
+                <span>Atrasado: <strong id="maverick-atrasado">11</strong></span>
+              </div>
+              <div class="status-item">
+                <div class="status-color status-revisao"></div>
+                <span>Em revisão: <strong id="maverick-revisao">14</strong></span>
+              </div>
+            </div>
+            <div class="progress-container">
+              <div class="progress-info">
+                <span>Progresso total</span>
+                <span>40%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width: 40%"></div>
+              </div>
+            </div>
+            <div class="project-actions">
+              <button class="btn primary view-details" data-client="maverick"><i class="fas fa-eye"></i> Ver detalhes</button>
+              <button class="btn ghost"><i class="fas fa-pen"></i> Editar</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modal de Detalhes -->
+  <div class="modal" id="detailsModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">
+          <i class="fas fa-folder-open"></i>
+          <span id="modalClientName">Detalhes do Cliente</span>
+        </div>
+        <button class="modal-close" id="closeModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="client-info">
+          <div class="client-avatar">
+            <img id="modalClientAvatar" src="" alt="Cliente">
+          </div>
+          <div class="client-details">
+            <h2 class="client-name" id="modalClientNameText">Nome do Cliente</h2>
+            <div class="client-projects" id="modalClientProjects">0 PROJETOS ATIVOS</div>
+          </div>
+        </div>
+        
+        <div class="videos-section">
+          <div class="videos-header">
+            <h3 class="videos-title">Vídeos do Cliente</h3>
+            <div class="videos-filter">
+              <button class="filter-btn active" data-filter="all">Todos</button>
+              <button class="filter-btn" data-filter="andamento">Em Andamento</button>
+              <button class="filter-btn" data-filter="atrasado">Atrasados</button>
+              <button class="filter-btn" data-filter="revisao">Em Revisão</button>
+              <button class="filter-btn" data-filter="entregue">Entregues</button>
+            </div>
+          </div>
+          <div class="videos-grid" id="videosContainer">
+            <!-- Os vídeos serão inseridos aqui via JavaScript -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Dados dos vídeos para cada cliente (agora com nomes padronizados)
+    const videosData = {
+      dragon: generateVideos(10),
+      devin: generateVideos(15),
+      sjo: generateVideos(45),
+      maverick: generateVideos(55)
+    };
+
+    // Função para gerar vídeos com nomes padronizados
+    function generateVideos(count) {
+      const videos = [];
+      for (let i = 1; i <= count; i++) {
+        // Gerar status aleatório
+        const statuses = ['andamento', 'atrasado', 'revisao', 'entregue'];
+        const status = statuses[Math.floor(Math.random() * statuses.length)];
+        
+        videos.push({
+          id: `VID_${i.toString().padStart(3, '0')}`,
+          title: `Vídeo #${i.toString().padStart(3, '0')}`,
+          status: status
+        });
+      }
+      return videos;
+    }
+
+    // Configuração das imagens dos clientes
+    const clientImages = {
+      dragon: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT3kpSJlO5QzSZtx7owaEY7Z7dHD_HUargnSA&s",
+      devin: "https://mn2s.com/wp-content/uploads/2022/10/Devin-Caherly.png",
+      sjo: "https://static.wikia.nocookie.net/youtube/images/3/34/SJohnsonVoiceOvers.jpg/revision/latest?cb=20241203170345",
+      maverick: "https://images.contactout.com/profiles/a8114a4e6209e8621d54f39a7b109d2a"
+    };
+
+    // Função para gerar dados aleatórios mantendo o total
+    function generateRandomData(total) {
+      let andamento = Math.floor(Math.random() * (total * 0.6)) + 1;
+      let atrasado = Math.floor(Math.random() * (total * 0.4));
+      let revisao = Math.floor(Math.random() * (total * 0.4));
+      let entregue = total - andamento - atrasado - revisao;
+      
+      // Ajuste para garantir que não haja valores negativos
+      if (entregue < 0) {
+        andamento += entregue;
+        entregue = 0;
+      }
+      
+      return [andamento, atrasado, revisao, entregue];
+    }
+
+    // Configuração dos gráficos
+    function createChart(canvasId, data, total) {
+      const ctx = document.getElementById(canvasId).getContext('2d');
+      return new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Em andamento', 'Atrasado', 'Em revisão', 'Entregue'],
+          datasets: [{
+            data: data,
+            backgroundColor: [
+              '#5b6cff', // andamento
+              '#ff4d4f', // atrasado
+              '#a259ff', // revisao
+              '#34c759'  // entregue
+            ],
+            borderWidth: 2,
+            borderColor: 'var(--card)',
+            hoverOffset: 10
+          }]
+        },
+        options: {
+          cutout: '75%',
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const percentage = Math.round((context.raw / total) * 100);
+                  return `${context.label}: ${context.raw} (${percentage}%)`;
+                }
+              }
+            }
+          },
+          maintainAspectRatio: false
+        }
+      });
+    }
+
+    // Função para abrir o modal com os detalhes do cliente
+    function openClientModal(client) {
+      const modal = document.getElementById('detailsModal');
+      const modalClientName = document.getElementById('modalClientName');
+      const modalClientNameText = document.getElementById('modalClientNameText');
+      const modalClientAvatar = document.getElementById('modalClientAvatar');
+      const modalClientProjects = document.getElementById('modalClientProjects');
+      const videosContainer = document.getElementById('videosContainer');
+      
+      // Configurar as informações do cliente no modal
+      const clientName = client.charAt(0).toUpperCase() + client.slice(1);
+      modalClientName.textContent = clientName;
+      modalClientNameText.textContent = clientName;
+      modalClientAvatar.src = clientImages[client];
+      modalClientProjects.textContent = `${videosData[client].length} PROJETOS ATIVOS`;
+      
+      // Limpar e preencher a lista de vídeos
+      videosContainer.innerHTML = '';
+      videosData[client].forEach(video => {
+        const statusClass = `status-${video.status}-badge`;
+        const statusText = getStatusText(video.status);
+        
+        const videoCard = document.createElement('div');
+        videoCard.className = 'video-card';
+        videoCard.dataset.status = video.status;
+        videoCard.innerHTML = `
+          <div class="video-id">#${video.id}</div>
+          <div class="video-title">${video.title}</div>
+          <div class="video-status ${statusClass}">
+            <i class="fas ${getStatusIcon(video.status)}"></i>
+            ${statusText}
+          </div>
+        `;
+        videosContainer.appendChild(videoCard);
+      });
+      
+      // Mostrar o modal
+      modal.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+
+    // Função auxiliar para obter o texto do status
+    function getStatusText(status) {
+      const statusMap = {
+        'andamento': 'Em Andamento',
+        'atrasado': 'Atrasado',
+        'revisao': 'Em Revisão',
+        'entregue': 'Entregue'
+      };
+      return statusMap[status] || status;
+    }
+
+    // Função auxiliar para obter o ícone do status
+    function getStatusIcon(status) {
+      const iconMap = {
+        'andamento': 'fa-play-circle',
+        'atrasado': 'fa-exclamation-circle',
+        'revisao': 'fa-search',
+        'entregue': 'fa-check-circle'
+      };
+      return iconMap[status] || 'fa-question-circle';
+    }
+
+    // Fechar o modal
+    function closeModal() {
+      const modal = document.getElementById('detailsModal');
+      modal.style.display = 'none';
+      document.body.style.overflow = 'auto';
+    }
+
+    // Filtrar vídeos no modal
+    function filterVideos(filter) {
+      const videos = document.querySelectorAll('.video-card');
+      videos.forEach(video => {
+        if (filter === 'all' || video.dataset.status === filter) {
+          video.style.display = 'block';
+        } else {
+          video.style.display = 'none';
+        }
+      });
+      
+      // Atualizar botões de filtro
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        if (btn.dataset.filter === filter) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+    }
+
+    // Inicializar gráficos quando a página carregar
+    document.addEventListener('DOMContentLoaded', function() {
+      // Dados para cada cliente
+      const dragonData = generateRandomData(10);
+      const devinData = generateRandomData(15);
+      const sjoData = generateRandomData(45);
+      const maverickData = generateRandomData(55);
+      
+      // Atualizar os valores nos spans
+      document.getElementById('dragon-andamento').textContent = dragonData[0];
+      document.getElementById('dragon-atrasado').textContent = dragonData[1];
+      document.getElementById('dragon-revisao').textContent = dragonData[2];
+      
+      document.getElementById('devin-andamento').textContent = devinData[0];
+      document.getElementById('devin-atrasado').textContent = devinData[1];
+      document.getElementById('devin-revisao').textContent = devinData[2];
+      
+      document.getElementById('sjo-andamento').textContent = sjoData[0];
+      document.getElementById('sjo-atrasado').textContent = sjoData[1];
+      document.getElementById('sjo-revisao').textContent = sjoData[2];
+      
+      document.getElementById('maverick-andamento').textContent = maverickData[0];
+      document.getElementById('maverick-atrasado').textContent = maverickData[1];
+      document.getElementById('maverick-revisao').textContent = maverickData[2];
+      
+      // Criar os gráficos
+      createChart('dragonChart', dragonData, 10);
+      createChart('devinChart', devinData, 15);
+      createChart('sjoChart', sjoData, 45);
+      createChart('maverickChart', maverickData, 55);
+      
+      // Adicionar event listeners para os botões de detalhes
+      document.querySelectorAll('.view-details').forEach(button => {
+        button.addEventListener('click', () => {
+          const client = button.dataset.client;
+          openClientModal(client);
+        });
+      });
+      
+      // Fechar modal
+      document.getElementById('closeModal').addEventListener('click', closeModal);
+      
+      // Fechar modal ao clicar fora do conteúdo
+      document.getElementById('detailsModal').addEventListener('click', (e) => {
+        if (e.target === document.getElementById('detailsModal')) {
+          closeModal();
+        }
+      });
+      
+      // Filtros de vídeos
+      document.querySelectorAll('.filter-btn').forEach(button => {
+        button.addEventListener('click', () => {
+          const filter = button.dataset.filter;
+          filterVideos(filter);
+        });
+      });
+    });
+
+    // Toggle de tema
+    const themeToggle = document.querySelector('.theme-btn');
+    const body = document.body;
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) body.setAttribute('data-theme', savedTheme);
+
+    function updateTheme() {
+      const icon = themeToggle.querySelector('i');
+      const t = body.getAttribute('data-theme') || 'light';
+      icon.className = t === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+    }
+
+    updateTheme();
+
+    themeToggle.addEventListener('click', () => {
+      const cur = body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      body.setAttribute('data-theme', cur);
+      localStorage.setItem('theme', cur);
+      updateTheme();
+    });
+  </script>
+</body>
+</html>

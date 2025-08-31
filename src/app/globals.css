@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+/* Faça o dark depender da classe .dark no <html> (ou qualquer ancestral) */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* (Opcional) variant para "light" por classe, útil p/ forçar estilos de claro */
+@custom-variant light (&:where(.light, .light *));
+
+/* (Recomendado) Ajuste o color-scheme nativo do browser */
+:root {
+  color-scheme: light;
+}
+.dark {
+  color-scheme: dark;
+}

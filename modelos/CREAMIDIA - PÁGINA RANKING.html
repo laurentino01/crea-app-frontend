@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ranking de Editores - Creamidia</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --color-primary: #5b6cff;
+      --color-primary-2: #6c4df5;
+      --bg: #f5f5f5;
+      --card: #ffffff;
+      --muted: #657080;
+      --text: #0b1020;
+      --success: #34c759;
+      --warning: #ffb020;
+      --danger: #ff4d4f;
+      --glass: rgba(0, 0, 0, 0.1);
+      --radius: 12px;
+      --radius-sm: 8px;
+      --shadow: 0 8px 24px rgba(11,16,32,0.06);
+      --shadow-sm: 0 4px 12px rgba(11,16,32,0.04);
+      --ui-gap: 16px;
+      --bronze: #8b4513; /* Rusty brown for bronze */
+      --silver: #b0c4de; /* Light steel blue for silver */
+      --gold: #d4a017; /* Rich gold for ouro */
+      --platinum: #4682b4; /* Steel blue for platina */
+    }
+
+    [data-theme="dark"] {
+      --bg: #100d12;
+      --card: #151117;
+      --muted: #9aa0aa;
+      --text: #f3f4f6;
+      --glass: rgba(255,255,255,0.03);
+      --shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+      --shadow-sm: 0 4px 14px rgba(0, 0, 0, 0.486);
+      --bronze: #a0522d; /* Lighter bronze for dark mode */
+      --silver: #c6d2e6; /* Lighter silver for dark mode */
+      --gold: #e6b800; /* Brighter gold for dark mode */
+      --platinum: #5f9ea0; /* Lighter blue for dark mode */
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      font-family: 'Inter', system-ui, Segoe UI, Roboto, Arial;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      transition: background 0.25s, color 0.25s;
+    }
+
+    .app {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 260px;
+      padding: 24px;
+      background: var(--card);
+      border-right: 1px solid rgba(11,16,32,0.04);
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: auto;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand img { height: 36px; }
+    .brand .title { font-weight: 700; color: var(--color-primary-2); }
+
+    .nav {
+      list-style: none;
+      padding: 0;
+      margin: 8px 0 0 0;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .nav a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px;
+      border-radius: 10px;
+      color: var(--muted);
+      text-decoration: none;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+    .nav a.active {
+      background: linear-gradient(90deg, rgba(107,95,255,0.09), rgba(92,108,255,0.03));
+      color: var(--color-primary-2);
+    }
+    .nav a:hover { background: rgba(107,95,255,0.05); }
+
+    .main { flex: 1; padding: 24px; overflow: auto; }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .page-title { font-size: 20px; font-weight: 700; }
+
+    .header-actions { display: flex; align-items: center; gap: 12px; }
+    .search {
+      display: flex;
+      align-items: center;
+      background: var(--card);
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(11,16,32,0.04);
+      gap: 8px;
+      box-shadow: var(--shadow-sm);
+      transition: border 0.2s;
+    }
+    .search input { border: 0; outline: 0; background: transparent; width: 260px; color: var(--text); }
+    .search:hover { border-color: var(--color-primary); }
+
+    .theme-btn {
+      background: transparent;
+      border: 1px solid rgba(11,16,32,0.04);
+      padding: 8px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .theme-btn:hover { background: rgba(107,95,255,0.05); }
+
+    .card {
+      background: var(--card);
+      padding: 20px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(11,16,32,0.04);
+      transition: transform 0.2s, box-shadow 0.2s;
+      margin-bottom: 24px;
+    }
+    .card:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(11,16,32,0.08); }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(11,16,32,0.04);
+    }
+    .section-title { font-size: 16px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+
+    .filterbar {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      background: var(--card);
+      padding: 12px;
+      border-radius: var(--radius);
+      border: 1px solid rgba(11,16,32,0.04);
+      box-shadow: var(--shadow-sm);
+      flex-wrap: wrap;
+      transition: box-shadow 0.2s;
+      margin-bottom: 24px;
+    }
+    .filterbar:hover { box-shadow: 0 6px 16px rgba(11,16,32,0.06); }
+    .filterbar .select {
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(11,16,32,0.06);
+      background: var(--card);
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 600;
+      transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+      cursor: pointer;
+      min-width: 200px;
+      appearance: none;
+      background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2212%22%20height%3D%228%22%20viewBox%3D%220%200%2012%208%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M1%201L6%206L11%201%22%20stroke%3D%22%23657080%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E');
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+    }
+    .filterbar .select:hover {
+      border-color: var(--color-primary);
+      transform: scale(1.02);
+    }
+    .filterbar .select:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 2px rgba(92,108,255,0.2);
+    }
+    .filterbar .selected-period {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .podium {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .podium-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 20px;
+      border-radius: var(--radius);
+      background: var(--card);
+      box-shadow: var(--shadow);
+      color: var(--text);
+      transition: transform 0.2s;
+      border: 1px solid rgba(11,16,32,0.04);
+    }
+    .podium-item:hover { transform: scale(1.03); }
+    .podium-item:nth-child(1) {
+      order: 2;
+      border-top: 4px solid var(--platinum);
+    }
+    .podium-item:nth-child(2) {
+      order: 1;
+      border-top: 4px solid var(--gold);
+    }
+    .podium-item:nth-child(3) {
+      order: 3;
+      border-top: 4px solid var(--bronze);
+    }
+    .podium-avatar {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 18px;
+      color: white;
+      margin-bottom: 12px;
+      background: linear-gradient(180deg, var(--color-primary-2), var(--color-primary));
+    }
+    .podium-rank {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .podium-rank i { font-size: 16px; }
+    .podium-rank.platinum { color: var(--platinum); }
+    .podium-rank.platinum i { color: var(--platinum); }
+    .podium-rank.gold { color: var(--gold); }
+    .podium-rank.gold i { color: var(--gold); }
+    .podium-rank.bronze { color: var(--bronze); }
+    .podium-rank.bronze i { color: var(--bronze); }
+    .podium-name {
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+    .podium-details {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .tiers-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .tier-card {
+      padding: 16px;
+      border-radius: var(--radius);
+      background: var(--card);
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+    .tier-card.bronze { border-top: 4px solid var(--bronze); }
+    .tier-card.silver { border-top: 4px solid var(--silver); }
+    .tier-card.gold { border-top: 4px solid var(--gold); }
+    .tier-card.platinum { border-top: 4px solid var(--platinum); }
+    .tier-title {
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+    .tier-min {
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+    .tier-prize {
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .tier-benefits {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .ranking-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+    .ranking-table th, .ranking-table td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid rgba(11,16,32,0.04);
+    }
+    .ranking-table th {
+      font-size: 13px;
+      color: var(--muted);
+      position: sticky;
+      top: 0;
+      background: var(--card);
+    }
+    .ranking-table tr {
+      transition: background 0.2s;
+    }
+    .ranking-table tr:hover {
+      background: linear-gradient(90deg, rgba(107,95,255,0.05), transparent);
+    }
+
+    .editor-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .editor-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: white;
+    }
+    .editor-info {
+      flex: 1;
+    }
+    .editor-name {
+      font-weight: 700;
+    }
+    .editor-details {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 12px;
+    }
+    .badge.bronze { background: rgba(139, 69, 19, 0.12); color: var(--bronze); }
+    .badge.silver { background: rgba(176, 196, 222, 0.12); color: var(--silver); }
+    .badge.gold { background: rgba(212, 160, 23, 0.12); color: var(--gold); }
+    .badge.platinum { background: rgba(70, 130, 180, 0.12); color: var(--platinum); }
+
+    .progress {
+      height: 10px;
+      background: rgba(11,16,32,0.06);
+      border-radius: 999px;
+      width: 120px;
+      overflow: hidden;
+    }
+    .progress > div {
+      height: 100%;
+      border-radius: 999px;
+    }
+    .progress.bronze > div { background: var(--bronze); }
+    .progress.silver > div { background: var(--silver); }
+    .progress.gold > div { background: var(--gold); }
+    .progress.platinum > div { background: var(--platinum); }
+
+    .btn {
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 0;
+      cursor: pointer;
+      font-weight: 700;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .btn:hover { transform: scale(1.05); }
+    .btn.primary { background: var(--color-primary); color: white; }
+    .btn.ghost { background: transparent; border: 1px solid rgba(11,16,32,0.06); }
+    .btn.success { background: var(--success); color: white; }
+
+    .muted { color: var(--muted); }
+    .flex { display: flex; gap: 8px; align-items: center; }
+
+    @media (max-width: 1024px) {
+      .sidebar { width: 88px; padding: 12px; }
+      .nav a span { display: none; }
+      .brand .title { display: none; }
+      .search input { width: 120px; }
+      .podium, .tiers-grid { grid-template-columns: 1fr; }
+      .filterbar { flex-direction: column; align-items: stretch; }
+      .filterbar .select { min-width: 100%; }
+    }
+    @media (max-width: 720px) {
+      .app { flex-direction: column; }
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        border-right: 0;
+        border-bottom: 1px solid rgba(11,16,32,0.04);
+      }
+      .main { padding: 16px; }
+      .filterbar .selected-period { font-size: 13px; }
+    }
+  </style>
+</head>
+<body data-theme="light">
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <img src="https://www.creamidia.com.br/images/about/logo-about.svg" alt="logo">
+        <div>
+          <div class="title">Creamidia</div>
+          <div class="muted" style="font-size:12px">Painel de Gestão</div>
+        </div>
+      </div>
+      <ul class="nav">
+        <li><a href="#"><i class="fas fa-th-large"></i><span>Dashboard</span></a></li>
+        <li><a href="#"><i class="fas fa-users"></i><span>Equipe</span></a></li>
+        <li><a href="#"><i class="fas fa-folder"></i><span>Projetos</span></a></li>
+        <li><a href="#" class="active"><i class="fas fa-trophy"></i><span>Ranking</span></a></li>
+        <li><a href="#"><i class="fas fa-cog"></i><span>Configurações</span></a></li>
+      </ul>
+      <div style="margin-top:auto;font-size:12px;color:var(--muted)">Versão alfa • Offline</div>
+    </aside>
+
+    <main class="main">
+      <div class="header">
+        <div style="display:flex;flex-direction:column">
+          <div class="page-title">Ranking dos Editores</div>
+        </div>
+        <div class="header-actions">
+          <div class="search">
+            <i class="fas fa-search muted"></i>
+            <input placeholder="Buscar editor...">
+          </div>
+          <button class="theme-btn" title="Alternar tema"><i class="fas fa-moon"></i></button>
+          <div class="flex" style="padding:6px 8px;border-radius:10px;background:var(--card);border:1px solid rgba(11,16,32,0.04)">
+            <div class="editor-avatar" style="background:linear-gradient(180deg,#6c4df5,#5b6cff)">AD</div>
+            <div style="font-weight:700">Admin</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="filterbar card">
+        <div class="muted">Período:</div>
+        <select class="select" id="periodSelect" title="Selecione o período para visualizar o ranking">
+          <optgroup label="Mensal">
+            <option value="2025-08-month" selected title="Ranking do mês de Agosto 2025">Agosto 2025</option>
+            <option value="2025-07-month" title="Ranking do mês de Julho 2025">Julho 2025</option>
+            <option value="2025-06-month" title="Ranking do mês de Junho 2025">Junho 2025</option>
+          </optgroup>
+          <optgroup label="Trimestral">
+            <option value="2025-q2" title="Ranking do 2º trimestre de 2025 (Abril-Junho)">2º Trimestre 2025</option>
+            <option value="2025-q1" title="Ranking do 1º trimestre de 2025 (Janeiro-Março)">1º Trimestre 2025</option>
+          </optgroup>
+          <optgroup label="Semestral">
+            <option value="2025-h1" title="Ranking do 1º semestre de 2025 (Janeiro-Junho)">1º Semestre 2025</option>
+          </optgroup>
+          <optgroup label="Anual">
+            <option value="2025-year" title="Ranking do ano inteiro de 2025">Ano de 2025</option>
+          </optgroup>
+        </select>
+        <div class="selected-period" id="selectedPeriod">Selecionado: Agosto 2025</div>
+      </div>
+
+      <section class="section card">
+        <div class="section-header">
+          <div class="section-title"><i class="fas fa-trophy"></i> Pódio Creamidia</div>
+        </div>
+        <div class="podium">
+          <div class="podium-item">
+            <div class="podium-rank platinum">
+              <i class="fas fa-medal"></i> Platina (742 pts)
+            </div>
+            <div class="podium-avatar">LS</div>
+            <div class="podium-name">Lucas Silva</div>
+            <div class="podium-details">28 vídeos entregues • Média: 8.7</div>
+          </div>
+          <div class="podium-item">
+            <div class="podium-rank gold">
+              <i class="fas fa-medal"></i> Ouro (580 pts)
+            </div>
+            <div class="podium-avatar">MS</div>
+            <div class="podium-name">Maria Santos</div>
+            <div class="podium-details">22 vídeos entregues • Média: 8.9</div>
+          </div>
+          <div class="podium-item">
+            <div class="podium-rank bronze">
+              <i class="fas fa-medal"></i> Bronze (420 pts)
+            </div>
+            <div class="podium-avatar">CO</div>
+            <div class="podium-name">Carlos Oliveira</div>
+            <div class="podium-details">18 vídeos entregues • Média: 7.8</div>
+          </div>
+        </div>
+      </section>  
+
+      <section class="section card">
+        <div class="section-header">
+          <div class="section-title"><i class="fas fa-medal"></i> Métricas</div>
+        </div>
+        <div class="tiers-grid">
+          <div class="tier-card bronze">
+            <div class="tier-title">Bronze</div>
+            <div class="tier-min">175+ pontos</div>
+            <div class="tier-prize">R$ 200</div>
+            <div class="tier-benefits">Dia de folga extra</div>
+          </div>
+          <div class="tier-card silver">
+            <div class="tier-title">Prata</div>
+            <div class="tier-min">350+ pontos</div>
+            <div class="tier-prize">R$ 500</div>
+            <div class="tier-benefits">Gift Card R$ 200 + prioridade em projetos</div>
+          </div>
+          <div class="tier-card gold">
+            <div class="tier-title">Ouro</div>
+            <div class="tier-min">525+ pontos</div>
+            <div class="tier-prize">R$ 750</div>
+            <div class="tier-benefits">Gift Card R$ 500 + upgrade de hardware</div>
+          </div>
+          <div class="tier-card platinum">
+            <div class="tier-title">Platina</div>
+            <div class="tier-min">700+ pontos</div>
+            <div class="tier-prize">R$ 1.500</div>
+            <div class="tier-benefits">Gift Card R$ 300 + participação nos lucros</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section card">
+        <div class="section-header">
+          <div class="section-title"><i class="fas fa-list-ol"></i> Ranking</div>
+        </div>
+        <table class="ranking-table">
+          <thead>
+            <tr>
+              <th>Posição</th>
+              <th>Editor</th>
+              <th>Nível</th>
+              <th>Pontuação</th>
+              <th>Qualidade</th>
+              <th>Progresso</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>#1</td>
+              <td>
+                <div class="editor-card">
+                  <div class="editor-avatar" style="background:linear-gradient(180deg,#6c4df5,#5b6cff)">LS</div>
+                  <div class="editor-info">
+                    <div class="editor-name">Lucas Silva</div>
+                    <div class="editor-details">28 vídeos</div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="badge platinum">Platina (742 pts)</span></td>
+              <td>
+                <div style="font-weight:800">742</div>
+                <div class="muted" style="font-size:12px">Pontos</div>
+              </td>
+              <td>
+                <div style="font-weight:800">8.7</div>
+                <div class="muted" style="font-size:12px">Qualidade</div>
+              </td>
+              <td>
+                <div class="muted" style="font-size:12px;margin-bottom:4px">+45 Bônus • -8 Penalidades</div>
+                <div class="progress platinum"><div style="width:100%"></div></div>
+                <div class="muted" style="font-size:12px;margin-top:4px">Nível Máximo Atingido</div>
+              </td>
+              <td>
+                <button class="btn success">Liberar Premiação</button>
+                <div class="muted" style="font-size:12px;margin-top:4px">R$ 1.500</div>
+                <div class="muted" style="font-size:12px">Nível atingido! 100%</div>
+              </td>
+            </tr>
+            <tr>
+              <td>#2</td>
+              <td>
+                <div class="editor-card">
+                  <div class="editor-avatar" style="background:linear-gradient(180deg,#6c4df5,#5b6cff)">MS</div>
+                  <div class="editor-info">
+                    <div class="editor-name">Maria Santos</div>
+                    <div class="editor-details">22 vídeos • 1 adv.</div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="badge gold">Ouro (580 pts)</span></td>
+              <td>
+                <div style="font-weight:800">580</div>
+                <div class="muted" style="font-size:12px">Pontos</div>
+              </td>
+              <td>
+                <div style="font-weight:800">8.9</div>
+                <div class="muted" style="font-size:12px">Qualidade</div>
+              </td>
+              <td>
+                <div class="muted" style="font-size:12px;margin-bottom:4px">+38 Bônus • -12 Penalidades</div>
+                <div class="progress gold"><div style="width:100%"></div></div>
+                <div class="muted" style="font-size:12px;margin-top:4px">Premiação Liberada</div>
+              </td>
+              <td>
+                <button class="btn" disabled>Premiação Liberada</button>
+                <div class="muted" style="font-size:12px;margin-top:4px">R$ 750</div>
+                <div class="muted" style="font-size:12px">em 14/08/2025</div>
+              </td>
+            </tr>
+            <tr>
+              <td>#3</td>
+              <td>
+                <div class="editor-card">
+                  <div class="editor-avatar" style="background:linear-gradient(180deg,#6c4df5,#5b6cff)">CO</div>
+                  <div class="editor-info">
+                    <div class="editor-name">Carlos Oliveira</div>
+                    <div class="editor-details">18 vídeos • 1 adv.</div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="badge bronze">Bronze (420 pts)</span></td>
+              <td>
+                <div style="font-weight:800">420</div>
+                <div class="muted" style="font-size:12px">Pontos</div>
+              </td>
+              <td>
+                <div style="font-weight:800">7.8</div>
+                <div class="muted" style="font-size:12px">Qualidade</div>
+              </td>
+              <td>
+                <div class="muted" style="font-size:12px;margin-bottom:4px">+22 Bônus • -15 Penalidades</div>
+                <div class="progress bronze"><div style="width:40%"></div></div>
+                <div class="muted" style="font-size:12px;margin-top:4px">Meta: Prata • 105 pts restantes</div>
+              </td>
+              <td>
+                <button class="btn primary">Liberar Premiação</button>
+                <div class="muted" style="font-size:12px;margin-top:4px">R$ 200</div>
+                <div class="muted" style="font-size:12px">40% • Atual: Bronze</div>
+              </td>
+            </tr>
+            <tr>
+              <td>#4</td>
+              <td>
+                <div class="editor-card">
+                  <div class="editor-avatar" style="background:linear-gradient(180deg,#6c4df5,#5b6cff)">AC</div>
+                  <div class="editor-info">
+                    <div class="editor-name">Ana Costa</div>
+                    <div class="editor-details">15 vídeos • 2 adv.</div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="badge bronze">Bronze (290 pts)</span></td>
+              <td>
+                <div style="font-weight:800">290</div>
+                <div class="muted" style="font-size:12px">Pontos</div>
+              </td>
+              <td>
+                <div style="font-weight:800">7.2</div>
+                <div class="muted" style="font-size:12px">Qualidade</div>
+              </td>
+              <td>
+                <div class="muted" style="font-size:12px;margin-bottom:4px">+18 Bônus • -22 Penalidades</div>
+                <div class="progress bronze"><div style="width:66%"></div></div>
+                <div class="muted" style="font-size:12px;margin-top:4px">Meta: Prata • 60 pts restantes</div>
+              </td>
+              <td>
+                <button class="btn primary">Liberar Premiação</button>
+                <div class="muted" style="font-size:12px;margin-top:4px">R$ 200</div>
+                <div class="muted" style="font-size:12px">66% • Atual: Bronze</div>
+              </td>
+            </tr>
+            <tr>
+              <td>#5</td>
+              <td>
+                <div class="editor-card">
+                  <div class="editor-avatar" style="background:linear-gradient(180deg,#6c4df5,#5b6cff)">PL</div>
+                  <div class="editor-info">
+                    <div class="editor-name">Pedro Lima</div>
+                    <div class="editor-details">8 vídeos • 2 adv.</div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="muted">Sem Nível (145 pts)</span></td>
+              <td>
+                <div style="font-weight:800">145</div>
+                <div class="muted" style="font-size:12px">Pontos</div>
+              </td>
+              <td>
+                <div style="font-weight:800">6.8</div>
+                <div class="muted" style="font-size:12px">Qualidade</div>
+              </td>
+              <td>
+                <div class="muted" style="font-size:12px;margin-bottom:4px">+8 Bônus • -18 Penalidades</div>
+                <div class="progress"><div style="width:83%;background:var(--color-primary)"></div></div>
+                <div class="muted" style="font-size:12px;margin-top:4px">Meta: Bronze • 30 pts restantes</div>
+              </td>
+              <td>
+                <button class="btn ghost" disabled>Meta: Bronze</button>
+                <div class="muted" style="font-size:12px;margin-top:4px">R$ 200</div>
+                <div class="muted" style="font-size:12px">83%</div>
+              </td>
+            </tr>
+            <tr>
+              <td>#6</td>
+              <td>
+                <div class="editor-card">
+                  <div class="editor-avatar" style="background:linear-gradient(180deg,#6c4df5,#5b6cff)">SR</div>
+                  <div class="editor-info">
+                    <div class="editor-name">Sofia Ribeiro</div>
+                    <div class="editor-details">5 vídeos • 1 adv.</div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="muted">Sem Nível (98 pts)</span></td>
+              <td>
+                <div style="font-weight:800">98</div>
+                <div class="muted" style="font-size:12px">Pontos</div>
+              </td>
+              <td>
+                <div style="font-weight:800">6.2</div>
+                <div class="muted" style="font-size:12px">Qualidade</div>
+              </td>
+              <td>
+                <div class="muted" style="font-size:12px;margin-bottom:4px">+4 Bônus • -12 Penalidades</div>
+                <div class="progress"><div style="width:56%;background:var(--color-primary)"></div></div>
+                <div class="muted" style="font-size:12px;margin-top:4px">Meta: Bronze • 77 pts restantes</div>
+              </td>
+              <td>
+                <button class="btn ghost" disabled>Meta: Bronze</button>
+                <div class="muted" style="font-size:12px;margin-top:4px">R$ 200</div>
+                <div class="muted" style="font-size:12px">56%</div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const themeToggle = document.querySelector('.theme-btn');
+    const body = document.body;
+    const periodSelect = document.querySelector('#periodSelect');
+    const selectedPeriod = document.querySelector('#selectedPeriod');
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) body.setAttribute('data-theme', savedTheme);
+
+    function updateTheme() {
+      const icon = themeToggle.querySelector('i');
+      const t = body.getAttribute('data-theme') || 'light';
+      icon.className = t === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+    }
+
+    function updateSelectedPeriod() {
+      const selectedOption = periodSelect.options[periodSelect.selectedIndex].text;
+      selectedPeriod.textContent = `Selecionado: ${selectedOption}`;
+    }
+
+    updateTheme();
+    updateSelectedPeriod();
+
+    themeToggle.addEventListener('click', () => {
+      const cur = body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      body.setAttribute('data-theme', cur);
+      localStorage.setItem('theme', cur);
+      updateTheme();
+    });
+
+    periodSelect.addEventListener('change', updateSelectedPeriod);
+  </script>
+</body>
+</html>

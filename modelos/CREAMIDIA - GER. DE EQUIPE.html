@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gerenciamento de Equipe - Creamidia</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --color-primary: #5b6cff;
+      --color-primary-2: #6c4df5;
+      --bg: #f5f5f5;
+      --card: #ffffff;
+      --muted: #657080;
+      --text: #0b1020;
+      --success: #34c759;
+      --warning: #ffb020;
+      --danger: #ff4d4f;
+      --glass: rgba(0, 0, 0, 0.1);
+      --radius: 12px;
+      --radius-sm: 8px;
+      --shadow: 0 8px 24px rgba(11,16,32,0.06);
+      --shadow-sm: 0 4px 12px rgba(11,16,32,0.04);
+      --ui-gap: 16px;
+    }
+
+    [data-theme="dark"] {
+      --bg: #100d12;
+      --card: #151117;
+      --muted: #9aa0aa;
+      --text: #f3f4f6;
+      --glass: rgba(255,255,255,0.03);
+      --shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+      --shadow-sm: 0 4px 14px rgba(0, 0, 0, 0.486);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      font-family: 'Inter', system-ui, Segoe UI, Roboto, Arial;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      transition: background 0.25s, color 0.25s;
+    }
+
+    .app {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 260px;
+      padding: 24px;
+      background: var(--card);
+      border-right: 1px solid rgba(11,16,32,0.04);
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: auto;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand img { height: 36px; }
+    .brand .title { font-weight: 700; color: var(--color-primary-2); }
+
+    .nav {
+      list-style: none;
+      padding: 0;
+      margin: 8px 0 0 0;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .nav a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px;
+      border-radius: 10px;
+      color: var(--muted);
+      text-decoration: none;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+    .nav a.active {
+      background: linear-gradient(90deg, rgba(107,95,255,0.09), rgba(92,108,255,0.03));
+      color: var(--color-primary-2);
+    }
+    .nav a:hover { background: rgba(107,95,255,0.05); }
+
+    .main { flex: 1; padding: 24px; overflow: auto; }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .page-title { font-size: 20px; font-weight: 700; }
+
+    .header-actions { display: flex; align-items: center; gap: 12px; }
+    .search {
+      display: flex;
+      align-items: center;
+      background: var(--card);
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(11,16,32,0.04);
+      gap: 8px;
+      box-shadow: var(--shadow-sm);
+      transition: border 0.2s;
+    }
+    .search input { border: 0; outline: 0; background: transparent; width: 260px; color: var(--text); }
+    .search:hover { border-color: var(--color-primary); }
+
+    .theme-btn {
+      background: transparent;
+      border: 1px solid rgba(11,16,32,0.04);
+      padding: 8px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .theme-btn:hover { background: rgba(107,95,255,0.05); }
+
+    .card {
+      background: var(--card);
+      padding: 20px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(11,16,32,0.04);
+      transition: transform 0.2s, box-shadow 0.2s;
+      margin-bottom: 24px;
+    }
+    .card:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(11,16,32,0.08); }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(11,16,32,0.04);
+    }
+    .section-title { font-size: 16px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+
+    .filterbar {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      background: var(--card);
+      padding: 12px;
+      border-radius: var(--radius);
+      border: 1px solid rgba(11,16,32,0.04);
+      box-shadow: var(--shadow-sm);
+      flex-wrap: wrap;
+      transition: box-shadow 0.2s;
+      margin-bottom: 24px;
+    }
+    .filterbar:hover { box-shadow: 0 6px 16px rgba(11,16,32,0.06); }
+    .filterbar .select {
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(11,16,32,0.06);
+      background: var(--card);
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 600;
+      transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+      cursor: pointer;
+      min-width: 200px;
+      appearance: none;
+      background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2212%22%20height%3D%228%22%20viewBox%3D%220%200%2012%208%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M1%201L6%206L11%201%22%20stroke%3D%22%23657080%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E');
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+    }
+    .filterbar .select:hover {
+      border-color: var(--color-primary);
+      transform: scale(1.02);
+    }
+    .filterbar .select:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 2px rgba(92,108,255,0.2);
+    }
+
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .team-card {
+      padding: 20px;
+      border-radius: var(--radius);
+      background: var(--card);
+      box-shadow: var(--shadow);
+      color: var(--text);
+      transition: transform 0.2s;
+      border: 1px solid rgba(11,16,32,0.04);
+    }
+    .team-card:hover { transform: scale(1.03); }
+    .team-card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .team-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 18px;
+      color: white;
+      background: linear-gradient(180deg, var(--color-primary-2), var(--color-primary));
+    }
+    .team-info {
+      flex: 1;
+    }
+    .team-name {
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+    .team-role {
+      font-size: 13px;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .team-role.admin { color: var(--color-primary-2); }
+    .team-role.editor { color: var(--success); }
+    .team-role.observer { color: var(--warning); }
+    .team-details {
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+    .team-contact {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .team-contact-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+    }
+    .team-projects {
+      background: rgba(11,16,32,0.03);
+      padding: 12px;
+      border-radius: var(--radius-sm);
+      margin-bottom: 16px;
+    }
+    .team-projects-title {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+    .team-projects-value {
+      font-weight: 800;
+      font-size: 18px;
+    }
+    .team-actions {
+      display: flex;
+      gap: 8px;
+    }
+    .btn {
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 0;
+      cursor: pointer;
+      font-weight: 700;
+      transition: background 0.2s, transform 0.2s;
+      font-size: 13px;
+    }
+    .btn:hover { transform: scale(1.05); }
+    .btn.primary { background: var(--color-primary); color: white; }
+    .btn.ghost { background: transparent; border: 1px solid rgba(11,16,32,0.06); }
+
+    .muted { color: var(--muted); }
+    .flex { display: flex; gap: 8px; align-items: center; }
+
+    @media (max-width: 1024px) {
+      .sidebar { width: 88px; padding: 12px; }
+      .nav a span { display: none; }
+      .brand .title { display: none; }
+      .search input { width: 120px; }
+      .team-grid { grid-template-columns: 1fr; }
+      .filterbar { flex-direction: column; align-items: stretch; }
+      .filterbar .select { min-width: 100%; }
+    }
+    @media (max-width: 720px) {
+      .app { flex-direction: column; }
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        border-right: 0;
+        border-bottom: 1px solid rgba(11,16,32,0.04);
+      }
+      .main { padding: 16px; }
+    }
+  </style>
+</head>
+<body data-theme="light">
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <img src="https://www.creamidia.com.br/images/about/logo-about.svg" alt="logo">
+        <div>
+          <div class="title">Creamidia</div>
+          <div class="muted" style="font-size:12px">Painel de Gestão</div>
+        </div>
+      </div>
+      <ul class="nav">
+        <li><a href="#"><i class="fas fa-th-large"></i><span>Dashboard</span></a></li>
+        <li><a href="#" class="active"><i class="fas fa-users"></i><span>Equipe</span></a></li>
+        <li><a href="#"><i class="fas fa-folder"></i><span>Projetos</span></a></li>
+        <li><a href="#"><i class="fas fa-trophy"></i><span>Ranking</span></a></li>
+        <li><a href="#"><i class="fas fa-cog"></i><span>Configurações</span></a></li>
+      </ul>
+      <div style="margin-top:auto;font-size:12px;color:var(--muted)">Versão alfa • Offline</div>
+    </aside>
+
+    <main class="main">
+      <div class="header">
+        <div style="display:flex;flex-direction:column">
+          <div class="page-title">Gerenciamento de Equipe</div>
+          <div class="muted" style="font-size:14px">Verifique a atividade do time</div>
+        </div>
+        <div class="header-actions">
+          <div class="search">
+            <i class="fas fa-search muted"></i>
+            <input placeholder="Buscar membro...">
+          </div>
+          <button class="theme-btn" title="Alternar tema"><i class="fas fa-moon"></i></button>
+          <div class="flex" style="padding:6px 8px;border-radius:10px;background:var(--card);border:1px solid rgba(11,16,32,0.04)">
+            <div class="team-avatar">AD</div>
+            <div style="font-weight:700">Admin</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="filterbar card">
+        <div class="muted">Função:</div>
+        <select class="select">
+          <option selected>Todos os Funções</option>
+          <option>Administrador</option>
+          <option>Editor de Vídeo</option>
+          <option>Revisor</option>
+        </select>
+        
+        <div class="muted">Status:</div>
+        <select class="select">
+          <option selected>Todos</option>
+          <option>Ativo</option>
+          <option>Inativo</option>
+        </select>
+      </div>
+
+      <section class="section">
+        <div class="team-grid">
+          <div class="team-card">
+            <div class="team-card-header">
+              <div class="team-avatar">WM</div>
+              <div class="team-info">
+                <div class="team-name">Wesley Moraes</div>
+<div class="team-role editor" style="color: #ffae00;"><i class="fas fa-users"></i> Em reunião</div>
+                <div class="team-role admin"><i class="fas fa-shield-alt"></i> Administrador</div>
+              </div>
+            </div>
+            <div class="team-details">
+            </div>
+            <div class="team-contact">
+              <div class="team-contact-item">
+                <i class="fas fa-envelope muted"></i>
+                <span>wesley@creamidia.com</span>
+              </div>
+              <div class="team-contact-item">
+                <i class="fas fa-phone muted"></i>
+                <span>(1) 99999-9999</span>
+              </div>
+              <div class="team-contact-item">
+                <i class="fas fa-calendar-alt muted"></i>
+                <span>Desde: 10/02/2025</span>
+              </div>
+            </div>
+            <div class="team-projects">
+              <div class="team-projects-title">Projetos</div>
+              <div class="team-projects-value">26</div>
+            </div>
+            <div class="team-actions">
+              <button class="btn primary">Ver mais</button>
+            </div>
+          </div>
+ <!-- Cursos Lima -->
+          <div class="team-card">
+            <div class="team-card-header">
+              <div class="team-avatar">RM</div>
+              <div class="team-info">
+                <div class="team-name">Rafael Magacho</div>
+<div class="team-role editor" style="color: #ffae00;"><i class="fas fa-users"></i> Em reunião</div>
+                <div class="team-role admin"><i class="fas fa-shield-alt"></i> Administrador</div>
+              </div>
+            </div>
+            <div class="team-details">
+
+            </div>
+            <div class="team-contact">
+              <div class="team-contact-item">
+                <i class="fas fa-envelope muted"></i>
+                <span>rafael@creamidia.com</span>
+              </div>
+              <div class="team-contact-item">
+                <i class="fas fa-phone muted"></i>
+                <span>(1) 99999-9996</span>
+              </div>
+              <div class="team-contact-item">
+                <i class="fas fa-calendar-alt muted"></i>
+                <span>Desde: 10/02/2025</span>
+              </div>
+            </div>
+            <div class="team-projects">
+              <div class="team-projects-title">Projetos</div>
+              <div class="team-projects-value">30</div>
+            </div>
+            <div class="team-actions">
+              <button class="btn primary">Ver mais</button>
+            </div>
+          </div>
+          <!-- Cursos Lima -->
+          <div class="team-card">
+            <div class="team-card-header">
+              <div class="team-avatar">GB</div>
+              <div class="team-info">
+                <div class="team-name">Guilherme Balthazar</div>
+                <div class="team-role observer"><i class="fas fa-eye"></i>Revisando</div>
+                <div class="team-role admin"><i class="fas fa-shield-alt"></i> Administrador</div>
+              </div>
+            </div>
+            <div class="team-details">
+            </div>
+            <div class="team-contact">
+              <div class="team-contact-item">
+                <i class="fas fa-envelope muted"></i>
+                <span>guilherme@creamidia.com</span>
+              </div>
+              <div class="team-contact-item">
+                <i class="fas fa-phone muted"></i>
+                <span>(1) 99999-9996</span>
+              </div>
+              <div class="team-contact-item">
+                <i class="fas fa-calendar-alt muted"></i>
+                <span>Desde: 10/02/2025</span>
+              </div>
+            </div>
+            <div class="team-projects">
+              <div class="team-projects-title">Projetos</div>
+              <div class="team-projects-value">30</div>
+            </div>
+            <div class="team-actions">
+              <button class="btn primary">Ver mais</button>
+            </div>
+          </div>
+
+          <div class="team-card">
+            <div class="team-card-header">
+              <div class="team-avatar">KA</div>
+              <div class="team-info">
+                <div class="team-name">Kaik Araújo</div>
+                <div class="team-role editor"><i class="fas fa-video"></i> Pós-produção</div>
+              </div>
+            </div>
+            <div class="team-details">
+              Projeto Atual: SJO Kit-Kats
+            </div>
+            <div class="team-contact">
+              <div class="team-contact-item">
+                <i class="fas fa-envelope muted"></i>
+                <span>kaik@creamidia.com</span>
+              </div>
+              <div class="team-contact-item">
+                <i class="fas fa-phone muted"></i>
+                <span>(1) 99999-9998</span>
+              </div>
+              <div class="team-contact-item">
+                <i class="fas fa-calendar-alt muted"></i>
+                <span>Desde: 25/06/2025</span>
+              </div>
+            </div>
+            <div class="team-projects">
+              <div class="team-projects-title">Projetos</div>
+              <div class="team-projects-value">10</div>
+            </div>
+            <div class="team-actions">
+              <button class="btn primary">Ver mais</button>
+            </div>
+          </div>
+
+          <div class="team-card">
+            <div class="team-card-header">
+              <div class="team-avatar">JC</div>
+              <div class="team-info">
+                <div class="team-name">Julio Camilo</div>
+                <div class="team-role editor"><i class="fas fa-video"></i> Decupando vídeo</div>
+              </div>
+            </div>
+            <div class="team-details">
+              Projeto Atual: Devin 99 Unpack
+            </div>
+            <div class="team-contact">
+              <div class="team-contact-item">
+                <i class="fas fa-envelope muted"></i>
+                <span>julio@creamidia.com</span>
+              </div>
+              <div class="team-contact-item">
+                <i class="fas fa-phone muted"></i>
+                <span>(1) 99999-9997</span>
+              </div>
+              <div class="team-contact-item">
+                <i class="fas fa-calendar-alt muted"></i>
+                <span>Desde: 27/03/2025</span>
+              </div>
+            </div>
+            <div class="team-projects">
+              <div class="team-projects-title">Projetos</div>
+              <div class="team-projects-value">12</div>
+            </div>
+            <div class="team-actions">
+              <button class="btn primary">Ver mais</button>
+            </div>
+          </div>
+
+          <div class="team-card">
+            <div class="team-card-header">
+              <div class="team-avatar">KB</div>
+              <div class="team-info">
+                <div class="team-name">Kayke Brusarosco</div>
+                <div class="team-role editor"><i class="fas fa-video"></i> Decupando vídeo</div>
+              </div>
+            </div>
+            <div class="team-details">
+              Projeto Atual: Wisskins #08
+            </div>
+            <div class="team-contact">
+              <div class="team-contact-item">
+                <i class="fas fa-envelope muted"></i>
+                <span>kayke@empresa.com</span>
+              </div>
+              <div class="team-contact-item">
+                <i class="fas fa-phone muted"></i>
+                <span>(1) 99999-9997</span>
+              </div>
+              <div class="team-contact-item">
+                <i class="fas fa-calendar-alt muted"></i>
+                <span>Desde: 27/03/2025</span>
+              </div>
+            </div>
+            <div class="team-projects">
+              <div class="team-projects-title">Projetos</div>
+              <div class="team-projects-value">10</div>
+            </div>
+            <div class="team-actions">
+              <button class="btn primary">Ver mais</button>
+            </div>
+          </div>
+
+      
+
+  <script>
+    const themeToggle = document.querySelector('.theme-btn');
+    const body = document.body;
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) body.setAttribute('data-theme', savedTheme);
+
+    function updateTheme() {
+      const icon = themeToggle.querySelector('i');
+      const t = body.getAttribute('data-theme') || 'light';
+      icon.className = t === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+    }
+
+    updateTheme();
+
+    themeToggle.addEventListener('click', () => {
+      const cur = body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      body.setAttribute('data-theme', cur);
+      localStorage.setItem('theme', cur);
+      updateTheme();
+    });
+  </script>
+</body>
+</html>

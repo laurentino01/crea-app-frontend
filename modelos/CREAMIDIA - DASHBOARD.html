@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard - Creamidia (Versão Final)</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --color-primary: #5b6cff;
+      --color-primary-2: #6c4df5;
+      --bg: #f5f5f5;
+      --card: #ffffff;
+      --muted: #657080;
+      --text: #0b1020;
+      --success: #34c759;
+      --warning: #ffb020;
+      --danger: #ff4d4f;
+      --glass: rgba(0, 0, 0, 0.1);
+      --radius: 12px;
+      --radius-sm: 8px;
+      --shadow: 0 8px 24px rgba(11,16,32,0.06);
+      --shadow-sm: 0 4px 12px rgba(11,16,32,0.04);
+      --ui-gap: 16px;
+    }
+
+    [data-theme="dark"] {
+      --bg: #0d0e12;
+      --card: #111217;
+      --muted: #9aa0aa;
+      --text: #f3f4f6;
+      --glass: rgba(255,255,255,0.03);
+      --shadow: 0 8px 30px rgba(0,0,0,0.6);
+      --shadow-sm: 0 4px 14px rgba(0,0,0,0.45);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      font-family: 'Inter', system-ui, Segoe UI, Roboto, Arial;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      transition: background 0.25s, color 0.25s;
+    }
+
+    .app {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 260px;
+      padding: 24px;
+      background: var(--card);
+      border-right: 1px solid rgba(11,16,32,0.04);
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: auto;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand img { height: 36px; }
+    .brand .title { font-weight: 700; color: var(--color-primary-2); }
+
+    .nav {
+      list-style: none;
+      padding: 0;
+      margin: 8px 0 0 0;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .nav a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px;
+      border-radius: 10px;
+      color: var(--muted);
+      text-decoration: none;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+    .nav a.active {
+      background: linear-gradient(90deg, rgba(107,95,255,0.09), rgba(92,108,255,0.03));
+      color: var(--color-primary-2);
+    }
+    .nav a:hover { background: rgba(107,95,255,0.05); }
+
+    .main { flex: 1; padding: 24px; overflow: auto; }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .page-title { font-size: 20px; font-weight: 700; }
+
+    .header-actions { display: flex; align-items: center; gap: 12px; }
+    .search {
+      display: flex;
+      align-items: center;
+      background: var(--card);
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(11,16,32,0.04);
+      gap: 8px;
+      box-shadow: var(--shadow-sm);
+      transition: border 0.2s;
+    }
+    .search input { border: 0; outline: 0; background: transparent; width: 260px; color: var(--text); }
+    .search:hover { border-color: var(--color-primary); }
+
+    .theme-btn {
+      background: transparent;
+      border: 1px solid rgba(11,16,32,0.04);
+      padding: 8px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .theme-btn:hover { background: rgba(107,95,255,0.05); }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .card {
+      background: var(--card);
+      padding: 20px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(11,16,32,0.04);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .card:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(11,16,32,0.08); }
+    .card h3 { margin: 0; font-size: 16px; color: var(--text); font-weight: 700; }
+    .card .value { font-size: 28px; font-weight: 800; margin-top: 8px; }
+
+    .flow {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      align-items: center;
+      text-align: center;
+      animation: fadeIn 0.5s ease-in;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .flow h3 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .flow p.muted {
+      margin: 8px 0;
+      font-size: 14px;
+      line-height: 1.5;
+      max-width: 500px;
+    }
+    .timer {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      background: var(--glass);
+      padding: 20px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      width: 100%;
+      max-width: 400px;
+      transition: transform 0.2s;
+    }
+    .timer:hover { transform: scale(1.02); }
+    .timer-display {
+      font-family: monospace;
+      font-size: 36px;
+      font-weight: 800;
+      color: var(--text);
+      background: var(--card);
+      padding: 12px 24px;
+      border-radius: 999px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid rgba(11,16,32,0.04);
+    }
+    .controls {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .btn {
+      padding: 10px 16px;
+      border-radius: 999px;
+      border: 0;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .btn:hover { transform: scale(1.05); }
+    .btn.primary { background: var(--color-primary); color: white; }
+    .btn.ghost { background: transparent; border: 1px solid rgba(11,16,32,0.06); color: var(--text); }
+    .feedback {
+      margin-top: 12px;
+      color: var(--success);
+      font-weight: 600;
+      font-size: 14px;
+      animation: pulse 0.8s ease-in-out;
+    }
+    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.03); } 100% { transform: scale(1); } }
+
+    .section { margin-bottom: 32px; }
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(11,16,32,0.04);
+    }
+    .section-title { font-size: 16px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+
+    .filterbar {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      background: var(--card);
+      padding: 12px;
+      border-radius: var(--radius);
+      border: 1px solid rgba(11,16,32,0.04);
+      box-shadow: var(--shadow-sm);
+      flex-wrap: wrap;
+      transition: box-shadow 0.2s;
+    }
+    .filterbar:hover { box-shadow: 0 6px 16px rgba(11,16,32,0.06); }
+    .filterbar .select, .filterbar input {
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(11,16,32,0.06);
+      background: transparent;
+      color: var(--text);
+      font-size: 14px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .filterbar .select:focus, .filterbar input:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 2px rgba(92,108,255,0.2);
+    }
+    .filterbar input { flex: 1; min-width: 200px; }
+
+    .table-wrap {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 12px;
+      border: 1px solid rgba(11,16,32,0.04);
+      box-shadow: var(--shadow);
+      overflow: auto;
+    }
+    table { width: 100%; border-collapse: collapse; min-width: 980px; }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid rgba(11,16,32,0.04); }
+    th { font-size: 13px; color: var(--muted); position: sticky; top: 0; background: var(--card); }
+    tr { cursor: pointer; transition: background 0.2s; }
+    tr:hover { background: linear-gradient(90deg, rgba(107,95,255,0.05), transparent); }
+
+    .progress { height: 10px; background: rgba(11,16,32,0.06); border-radius: 999px; width: 120px; overflow: hidden; }
+    .progress > i { display: block; height: 100%; border-radius: 999px; }
+
+    .badge { display: inline-block; padding: 6px 10px; border-radius: 999px; font-weight: 700; font-size: 12px; }
+    .badge.late { background: rgba(255,77,79,0.12); color: var(--danger); }
+    .badge.analysis { background: rgba(255,176,32,0.12); color: var(--warning); }
+    .badge.done { background: rgba(52,199,89,0.12); color: var(--success); }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(3,6,12,0.45);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal-card {
+      width: 92%;
+      max-width: 820px;
+      background: var(--card);
+      padding: 20px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+    .modal-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .status-card {
+      background: var(--card);
+      padding: 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(11,16,32,0.04);
+      text-align: center;
+    }
+    .status-card h4 { margin: 0; font-size: 14px; color: var(--muted); }
+    .status-card .count { font-size: 20px; font-weight: 800; margin: 8px 0; }
+    .status-card.late .count { color: var(--danger); }
+    .status-card.ontrack .count { color: var(--warning); }
+    .status-card.done .count { color: var(--success); }
+
+    .avatar {
+      width: 64px;
+      height: 64px;
+      border-radius: var(--radius-sm);
+      background: linear-gradient(180deg, var(--color-primary), var(--color-primary-2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 800;
+    }
+
+    @media (max-width: 1024px) {
+      .sidebar { width: 88px; padding: 12px; }
+      .nav a span { display: none; }
+      .brand .title { display: none; }
+      .search input { width: 120px; }
+      table { min-width: 720px; }
+      .filterbar { flex-direction: column; align-items: stretch; }
+      .filterbar .select, .filterbar input { width: 100%; }
+      .timer { max-width: 100%; padding: 16px; }
+      .timer-display { font-size: 28px; padding: 10px 20px; }
+      .controls { gap: 8px; }
+      .btn { padding: 8px 14px; font-size: 13px; }
+    }
+    @media (max-width: 720px) {
+      .app { flex-direction: column; }
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        border-right: 0;
+        border-bottom: 1px solid rgba(11,16,32,0.04);
+      }
+      .main { padding: 16px; }
+      table { min-width: 600px; }
+      .status-grid { grid-template-columns: 1fr; }
+      .flow p.muted { font-size: 13px; }
+      .timer { padding: 12px; }
+      .timer-display { font-size: 24px; padding: 8px 16px; }
+      .controls { flex-direction: column; gap: 10px; }
+    }
+
+    .muted { color: var(--muted); }
+    .flex { display: flex; gap: 8px; align-items: center; }
+  </style>
+</head>
+<body data-theme="light">
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <img src="https://www.creamidia.com.br/images/about/logo-about.svg" alt="logo">
+        <div>
+          <div class="title">Creamidia</div>
+          <div class="muted" style="font-size:12px">Painel de Gestão</div>
+        </div>
+      </div>
+      <ul class="nav">
+        <li><a href="#" class="active"><i class="fas fa-th-large"></i><span>Dashboard</span></a></li>
+        <li><a href="#"><i class="fas fa-users"></i><span>Equipe</span></a></li>
+        <li><a href="#"><i class="fas fa-folder"></i><span>Projetos</span></a></li>
+        <li><a href="#"><i class="fas fa-trophy"></i><span>Ranking</span></a></li>
+        <li><a href="#"><i class="fas fa-cog"></i><span>Configurações</span></a></li>
+      </ul>
+      <div style="margin-top:auto;font-size:12px;color:var(--muted)">Versão alfa • Offline</div>
+    </aside>
+
+    <main class="main">
+      <div class="header">
+        <div style="display:flex;flex-direction:column">
+          <div class="page-title">Dashboard</div>
+          <div class="muted">Visão geral — Alocação & status de projetos</div>
+        </div>
+        <div class="header-actions">
+          <div class="search">
+            <i class="fas fa-search muted"></i>
+            <input id="globalSearch" placeholder="Buscar editor, projeto, tag...">
+          </div>
+          <button id="themeToggle" class="theme-btn" title="Alternar tema"><i class="fas fa-moon"></i></button>
+          <div class="flex" style="padding:6px 8px;border-radius:10px;background:var(--card);border:1px solid rgba(11,16,32,0.04)">
+            <div class="avatar">AD</div>
+            <div style="font-weight:700">Admin</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <h3>Projetos Atrasados</h3>
+          <div class="value" id="cardLate">0</div>
+          <div class="muted">Precisam de atenção</div>
+        </div>
+        <div class="card">
+          <h3>Projetos no Prazo</h3>
+          <div class="value" id="cardOnTime">0</div>
+          <div class="muted">No caminho certo</div>
+        </div>
+        <div class="card">
+          <h3>Editores Ativos</h3>
+          <div class="value" id="cardActive">0</div>
+          <div class="muted">Trabalhando agora</div>
+        </div>
+        <div class="card">
+          <h3>Projetos Ativos</h3>
+          <div class="value" id="cardDone">0</div>
+          <div class="muted">Este mês</div>
+        </div>
+      </div>
+
+      <section class="section card">
+        <div class="section-header">
+          <div class="section-title"><i class="fas fa-tasks"></i> Projetos em Andamento</div>
+          <div class="muted">Indicadores de status/atraso destacados</div>
+        </div>
+        <div class="table-wrap">
+          <table id="tasksTable">
+            <thead>
+              <tr>
+                <th>Editor</th>
+                <th>Projeto</th>
+                <th>Etapa</th>
+                <th>Progresso</th>
+                <th>Status</th>
+                <th>Cliente</th>
+                <th>Início</th>
+                <th>Previsão</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="section card">
+        <div class="section-header">
+          <div class="section-title"></i> Flow Time</div>
+        </div>
+        <div class="flow">
+          <h3>Flow Time</h3>
+          <p class="muted">Registre seu tempo de trabalho para acompanhar sua produtividade e otimizar sua rotina.</p>
+          <div class="timer">
+            <div class="timer-display" id="timerDisplay">00:00:00</div>
+            <div class="controls">
+              <button id="startTimer" class="btn primary"><i class="fas fa-clock"></i></i> Iniciar</button>
+              <button id="pauseTimer" class="btn ghost" style="display:none"><i class="fas fa-clock"></i></i> Pausar</button>
+              <button id="stopTimer" class="btn ghost" style="display:none"><i class="fas fa-clock"></i></i> Parar</button>
+            </div>
+          </div>
+          <div id="timerFeedback" class="feedback" style="display:none">Tempo registrado com sucesso!</div>
+        </div>
+      </section>
+
+      <section class="section card">
+        <div class="section-header">
+          <div class="section-title">Alocação da Equipe</div>
+        </div>
+        <div class="filterbar">
+          <input id="globalFilter" placeholder="Buscar em todos os campos..." style="flex:1;min-width:200px">
+          <select id="filterProject" class="select">
+            <option value="all">Todos os Projetos</option>
+          </select>
+          <select id="filterStage" class="select">
+            <option value="all">Todas as Etapas</option>
+          </select>
+          <select id="filterClient" class="select">
+            <option value="all">Todos os Clientes</option>
+          </select>
+          <select id="filterProgress" class="select">
+            <option value="all">Todos os Progressos</option>
+            <option value=">70">> 70%</option>
+            <option value="40-70">40% - 70%</option>
+            <option value="<40">< 40%</option>
+          </select>
+        </div>
+        <div class="table-wrap" style="margin-top:12px">
+          <table id="allocationTable">
+            <thead>
+              <tr>
+                <th>Editor</th>
+                <th>Projeto</th>
+                <th>Etapa</th>
+                <th>Progresso</th>
+                <th>Cliente</th>
+                <th>Início</th>
+                <th>Previsão</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div style="text-align:center;color:var(--muted);margin-top:8px" id="tableFooter">Mostrando 0 de 0 membros</div>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal-overlay" id="editorModal">
+    <div class="modal-card">
+      <div class="modal-top">
+        <div style="display:flex;gap:12px;align-items:center">
+          <div class="avatar" id="modalAvatar">LS</div>
+          <div>
+            <div id="modalName" style="font-weight:800">Nome</div>
+            <div class="muted" id="modalRole">Cargo</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button id="modalClose" class="btn ghost">Fechar</button>
+        </div>
+      </div>
+      <div class="status-grid" id="modalStatusGrid">
+        <div class="status-card late">
+          <h4>Atrasado</h4>
+          <div class="count" id="modalLateCount">0</div>
+          <div class="muted">Projetos atrasados</div>
+        </div>
+        <div class="status-card ontrack">
+          <h4>Em Andamento</h4>
+          <div class="count" id="modalOnTrackCount">0</div>
+          <div class="muted">Projetos no prazo</div>
+        </div>
+        <div class="status-card done">
+          <h4>Entregue</h4>
+          <div class="count" id="modalDoneCount">0</div>
+          <div class="muted">Projetos concluídos</div>
+        </div>
+      </div>
+      <div id="modalProjectDetails" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px">
+        <div class="card">
+          <div style="font-weight:800;font-size:22px" id="modalProject">Projeto</div>
+          <div class="muted" id="modalStage">Etapa</div>
+          <div style="margin-top:12px">
+            <div class="muted">Progresso</div>
+            <div class="progress" style="margin-top:8px"><i id="modalProgress" style="width:40%"></i></div>
+          </div>
+        </div>
+        <div class="card">
+          <div style="font-weight:700">Contatos</div>
+          <div class="muted" style="margin-top:8px">Email: <span id="modalEmail"></span></div>
+          <div class="muted" style="margin-top:6px">Telefone: <span id="modalPhone"></span></div>
+          <div style="margin-top:10px">Cliente: <strong id="modalClient"></strong></div>
+          <div style="margin-top:8px">Início: <strong id="modalStart"></strong></div>
+          <div style="margin-top:4px">Previsão: <strong id="modalDue"></strong></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const data = [
+      {id:1,user:'Lucas Silva', project:'Projeto #01', stage:'Decupagem', progress:65, client:'Cliente #01', start:'2025-08-01', due:'2025-08-07', email:'lucas.silva@creamidia.com', phone:'(11) 99999-0001'},
+      {id:2,user:'Renato Costa', project:'Projeto #02', stage:'Sonorização', progress:80, client:'Cliente #02', start:'2025-08-05', due:'2025-08-15', email:'renato@creamidia.com', phone:'(11) 99999-0002'},
+      {id:3,user:'Priscilla Santos', project:'Projeto #03', stage:'Pós-produção', progress:40, client:'Cliente #03', start:'2025-07-30', due:'2025-08-04', email:'pris@creamidia.com', phone:'(11) 99999-0003'},
+      {id:4,user:'Ana Costa', project:'Projeto #04', stage:'Análise', progress:90, client:'Cliente #01', start:'2025-08-02', due:'2025-08-06', email:'ana@creamidia.com', phone:'(11) 99999-0004'},
+      {id:5,user:'João Oliveira', project:'Projeto #05', stage:'Revisão', progress:30, client:'Cliente #04', start:'2025-08-10', due:'2025-08-20', email:'joao@creamidia.com', phone:'(11) 99999-0005'},
+      {id:6,user:'Mariana Lopes', project:'Projeto #06', stage:'Decupagem', progress:15, client:'Cliente #05', start:'2025-08-12', due:'2025-08-18', email:'mari@creamidia.com', phone:'(11) 99999-0006'},
+      {id:7,user:'Carlos Melo', project:'Projeto #07', stage:'Pós-produção', progress:72, client:'Cliente #02', start:'2025-08-03', due:'2025-08-25', email:'carlos@creamidia.com', phone:'(11) 99999-0007'},
+      {id:8,user:'Beatriz Alves', project:'Projeto #08', stage:'Sonorização', progress:55, client:'Cliente #06', start:'2025-08-09', due:'2025-08-30', email:'bea@creamidia.com', phone:'(11) 99999-0008'},
+    ];
+
+    const $ = sel => document.querySelector(sel);
+    const $$ = sel => Array.from(document.querySelectorAll(sel));
+
+    function formatDateIsoToBR(iso) {
+      if (!iso) return '';
+      const d = new Date(iso);
+      return d.toLocaleDateString('pt-BR');
+    }
+
+    function statusFromRow(row) {
+      const today = new Date().setHours(0,0,0,0);
+      const due = new Date(row.due).setHours(0,0,0,0);
+      if (row.progress >= 100) return 'done';
+      if (due < today && row.progress < 100) return 'late';
+      if (row.stage.toLowerCase().includes('análise') || row.stage.toLowerCase().includes('analis')) return 'analysis';
+      return 'ontrack';
+    }
+
+    function progressColor(p) {
+      if (p > 70) return 'linear-gradient(90deg, rgba(52,199,89,1), rgba(0,160,120,0.9))';
+      if (p >= 40) return 'linear-gradient(90deg, rgba(255,176,32,1), rgba(255,142,0,0.9))';
+      return 'linear-gradient(90deg, rgba(255,77,79,1), rgba(204,40,48,0.95))';
+    }
+
+    function getUserStatusCounts(user) {
+      const userProjects = data.filter(d => d.user === user);
+      const counts = { late: 0, ontrack: 0, done: 0 };
+      userProjects.forEach(project => {
+        const status = statusFromRow(project);
+        if (status === 'late') counts.late++;
+        else if (status === 'done') counts.done++;
+        else if (status !== 'analysis') counts.ontrack++;
+      });
+      return counts;
+    }
+
+    const projectSet = new Set();
+    const stageSet = new Set();
+    const clientSet = new Set();
+    data.forEach(d => { projectSet.add(d.project); stageSet.add(d.stage); clientSet.add(d.client); });
+
+    const filterProject = $('#filterProject');
+    const filterStage = $('#filterStage');
+    const filterClient = $('#filterClient');
+
+    for (const p of Array.from(projectSet)) {
+      const opt = document.createElement('option');
+      opt.value = p;
+      opt.textContent = p;
+      filterProject.appendChild(opt);
+    }
+    for (const s of Array.from(stageSet)) {
+      const opt = document.createElement('option');
+      opt.value = s;
+      opt.textContent = s;
+      filterStage.appendChild(opt);
+    }
+    for (const c of Array.from(clientSet)) {
+      const opt = document.createElement('option');
+      opt.value = c;
+      opt.textContent = c;
+      filterClient.appendChild(opt);
+    }
+
+    const allocationBody = $('#allocationTable tbody');
+    const tasksBody = $('#tasksTable tbody');
+
+    function render() {
+      const globalFilter = ($('#globalFilter').value || '').toLowerCase();
+      const gf2 = ($('#globalSearch').value || '').toLowerCase();
+      const selProject = filterProject.value;
+      const selStage = filterStage.value;
+      const selClient = filterClient.value;
+      const selProgress = $('#filterProgress').value;
+
+      let rows = data.filter(r => {
+        if (selProject !== 'all' && r.project !== selProject) return false;
+        if (selStage !== 'all' && r.stage !== selStage) return false;
+        if (selClient !== 'all' && r.client !== selClient) return false;
+        if (selProgress !== 'all') {
+          if (selProgress === '>70') {
+            if (!(r.progress > 70)) return false;
+          } else if (selProgress === '40-70') {
+            if (!(r.progress >= 40 && r.progress <= 70)) return false;
+          } else if (selProgress === '<40') {
+            if (!(r.progress < 40)) return false;
+          }
+        }
+        const hay = (r.user + ' ' + r.project + ' ' + r.stage + ' ' + r.client + ' ' + r.email + ' ' + r.phone + ' ' + r.start + ' ' + r.due).toLowerCase();
+        if (globalFilter && !hay.includes(globalFilter)) return false;
+        if (gf2 && !hay.includes(gf2)) return false;
+        return true;
+      });
+
+      allocationBody.innerHTML = '';
+      rows.forEach(r => {
+        const tr = document.createElement('tr');
+        tr.dataset.id = r.id;
+        tr.innerHTML = `
+          <td><div style="display:flex;align-items:center;gap:8px;cursor:pointer" class="user-cell"><div style="width:36px;height:36px;border-radius:8px;background:linear-gradient(180deg,#6c4df5,#5b6cff);color:white;display:flex;align-items:center;justify-content:center;font-weight:700">${r.user.split(' ').map(s => s[0]).slice(0,2).join('')}</div><div><div style="font-weight:700">${r.user}</div><div class="muted" style="font-size:12px">${r.email}</div></div></div></td>
+          <td>${r.project}</td>
+          <td>${r.stage}</td>
+          <td>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="font-weight:800">${r.progress}%</div>
+              <div class="progress"><i style="width:${r.progress}%;background:${progressColor(r.progress)}"></i></div>
+            </div>
+          </td>
+          <td>${r.client}</td>
+          <td>${formatDateIsoToBR(r.start)}</td>
+          <td>${formatDateIsoToBR(r.due)}</td>
+        `;
+        tr.querySelector('.user-cell').addEventListener('click', (e) => {
+          e.stopPropagation();
+          openModal(r, true);
+        });
+        tr.addEventListener('click', () => openModal(r, false));
+        allocationBody.appendChild(tr);
+      });
+
+      tasksBody.innerHTML = '';
+      data.forEach(r => {
+        const tr = document.createElement('tr');
+        const stat = statusFromRow(r);
+        let badgeHtml = '';
+        if (stat === 'late') badgeHtml = '<span class="badge late">Atrasado</span>';
+        else if (stat === 'analysis') badgeHtml = '<span class="badge analysis">Em análise</span>';
+        else if (stat === 'done') badgeHtml = '<span class="badge done">Entregue</span>';
+        else badgeHtml = '<span class="muted">No prazo</span>';
+        tr.innerHTML = `
+          <td><div style="display:flex;align-items:center;gap:8px;cursor:pointer" class="user-cell"><div style="width:36px;height:36px;border-radius:8px;background:linear-gradient(180deg,#6c4df5,#5b6cff);color:white;display:flex;align-items:center;justify-content:center;font-weight:700">${r.user.split(' ').map(s => s[0]).slice(0,2).join('')}</div><div style="font-weight:700">${r.user}</div></div></td>
+          <td>${r.project}</td>
+          <td>${r.stage}</td>
+          <td><div style="display:flex;align-items:center;gap:10px"><div style="font-weight:800">${r.progress}%</div><div class="progress"><i style="width:${r.progress}%;background:${progressColor(r.progress)}"></i></div></div></td>
+          <td>${badgeHtml}</td>
+          <td>${r.client}</td>
+          <td>${formatDateIsoToBR(r.start)}</td>
+          <td>${formatDateIsoToBR(r.due)}</td>
+        `;
+        tr.querySelector('.user-cell').addEventListener('click', (e) => {
+          e.stopPropagation();
+          openModal(r, true);
+        });
+        tr.addEventListener('click', () => openModal(r, false));
+        tasksBody.appendChild(tr);
+      });
+
+      $('#tableFooter').textContent = `Mostrando ${rows.length} de ${data.length} membros`;
+
+      const lateCount = data.filter(d => statusFromRow(d) === 'late').length;
+      const doneCount = data.filter(d => d.progress >= 100).length;
+      const ontime = data.filter(d => statusFromRow(d) !== 'late' && d.progress < 100 && !d.stage.toLowerCase().includes('análise')).length;
+      const activeEditors = new Set(data.map(d => d.user)).size;
+      $('#cardLate').textContent = lateCount;
+      $('#cardDone').textContent = doneCount;
+      $('#cardOnTime').textContent = ontime;
+      $('#cardActive').textContent = activeEditors;
+    }
+
+    const modal = $('#editorModal');
+    const modalClose = $('#modalClose');
+    function openModal(row, showStatus = false) {
+      modal.classList.remove('active');
+      modal.style.display = 'none';
+      document.body.style.overflow = '';
+
+      $('#modalAvatar').textContent = row.user.split(' ').map(s => s[0]).slice(0, 2).join('');
+      $('#modalName').textContent = row.user;
+      $('#modalRole').textContent = showStatus ? 'Resumo de Projetos' : `${row.stage} • ${row.project}`;
+      $('#modalProject').textContent = row.project;
+      $('#modalStage').textContent = row.stage;
+      $('#modalProgress').style.width = row.progress + '%';
+      $('#modalProgress').style.background = progressColor(row.progress);
+      $('#modalEmail').textContent = row.email;
+      $('#modalPhone').textContent = row.phone;
+      $('#modalClient').textContent = row.client;
+      $('#modalStart').textContent = formatDateIsoToBR(row.start);
+      $('#modalDue').textContent = formatDateIsoToBR(row.due);
+
+      const statusCounts = getUserStatusCounts(row.user);
+      $('#modalLateCount').textContent = statusCounts.late;
+      $('#modalOnTrackCount').textContent = statusCounts.ontrack;
+      $('#modalDoneCount').textContent = statusCounts.done;
+
+      const projectDetails = $('#modalProjectDetails');
+      const statusGrid = $('#modalStatusGrid');
+      projectDetails.style.display = showStatus ? 'none' : 'grid';
+      statusGrid.style.display = showStatus ? 'grid' : 'none';
+
+      modal.classList.add('active');
+      modal.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+    function closeModal() {
+      modal.classList.remove('active');
+      modal.style.display = 'none';
+      document.body.style.overflow = '';
+    }
+    modalClose.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+    ['#filterProject', '#filterStage', '#filterClient', '#filterProgress', '#globalFilter', '#globalSearch'].forEach(s => {
+      $(s).addEventListener('input', render);
+      $(s).addEventListener('change', render);
+    });
+
+    $('#globalSearch').addEventListener('keyup', render);
+
+    const themeToggle = $('#themeToggle');
+    const body = document.body;
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) body.setAttribute('data-theme', savedTheme);
+    function updateTheme() {
+      const icon = themeToggle.querySelector('i');
+      const t = body.getAttribute('data-theme') || 'light';
+      icon.className = t === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+    }
+    updateTheme();
+    themeToggle.addEventListener('click', () => {
+      const cur = body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      body.setAttribute('data-theme', cur);
+      localStorage.setItem('theme', cur);
+      updateTheme();
+    });
+
+    let timerInterval, totalSeconds = 0, running = false;
+    const timerDisplay = $('#timerDisplay');
+    const startBtn = $('#startTimer'), pauseBtn = $('#pauseTimer'), stopBtn = $('#stopTimer'), timerFeedback = $('#timerFeedback');
+
+    function formatHHMMSS(s) {
+      const h = Math.floor(s / 3600).toString().padStart(2, '0');
+      const m = Math.floor((s % 3600) / 60).toString().padStart(2, '0');
+      const sec = (s % 60).toString().padStart(2, '0');
+      return `${h}:${m}:${sec}`;
+    }
+
+    startBtn.addEventListener('click', () => {
+      if (running) return;
+      running = true;
+      startBtn.style.display = 'none';
+      pauseBtn.style.display = 'inline-block';
+      stopBtn.style.display = 'inline-block';
+      timerInterval = setInterval(() => {
+        totalSeconds++;
+        timerDisplay.textContent = formatHHMMSS(totalSeconds);
+      }, 1000);
+    });
+
+    pauseBtn.addEventListener('click', () => {
+      if (!running) return;
+      running = false;
+      clearInterval(timerInterval);
+      startBtn.style.display = 'inline-block';
+      pauseBtn.style.display = 'none';
+    });
+
+    stopBtn.addEventListener('click', () => {
+      if (timerInterval) clearInterval(timerInterval);
+      running = false;
+      startBtn.style.display = 'inline-block';
+      pauseBtn.style.display = 'none';
+      stopBtn.style.display = 'none';
+      if (totalSeconds > 0) {
+        timerFeedback.style.display = 'block';
+        setTimeout(() => timerFeedback.style.display = 'none', 2200);
+      }
+      const sessions = JSON.parse(localStorage.getItem('flowSessions') || '[]');
+      sessions.push({ duration: totalSeconds, endedAt: new Date().toISOString() });
+      localStorage.setItem('flowSessions', JSON.stringify(sessions));
+      totalSeconds = 0;
+      timerDisplay.textContent = '00:00:00';
+    });
+
+    render();
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
+    });
+  </script>
+</body>
+</html>
