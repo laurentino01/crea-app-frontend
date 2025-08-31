@@ -9,6 +9,7 @@ export default function Equipe() {
           Adicionar Membro
         </button>
       </section>
+      <section></section>
     </>
   );
 }
