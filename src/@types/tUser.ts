@@ -8,4 +8,9 @@ export type tUserCreateDto = {
   isAdm: boolean;
 };
 
-export type tUserPersisted = Omit<tUserCreateDto, "senhaConfirm">;
+export type tUserPersisted = { id: string } & Omit<tUserCreateDto, "senhaConfirm">;
+
+export type tUserListQuery = {
+  search?: string;
+  isAdm?: boolean;
+};

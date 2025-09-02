@@ -48,7 +48,9 @@ export default function Header() {
   };
 
   useEffect(() => {
-    setCurrentPage(pathname.slice(1));
+    let slug = pathname.slice(1);
+
+    setCurrentPage(slug.slice(0, slug.indexOf("/")));
   }, [pathname]);
 
   return (
