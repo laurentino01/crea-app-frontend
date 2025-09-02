@@ -28,10 +28,11 @@ export default function Equipe() {
     senhaConfirm: string;
     dataNascimento?: string; // input type="date" yields string (YYYY-MM-DD)
     isAdm: boolean;
+    ativo: boolean;
   };
 
   const { register, handleSubmit, reset } = useForm<FormValues>({
-    defaultValues: { isAdm: false },
+    defaultValues: { isAdm: false, ativo: true },
   });
 
   async function reload() {
@@ -64,6 +65,7 @@ export default function Equipe() {
         ? new Date(values.dataNascimento)
         : undefined,
       isAdm: values.isAdm,
+      ativo: values.ativo,
     };
 
     await userService.create(dto);
@@ -252,6 +254,21 @@ export default function Equipe() {
                   className="cursor-pointer text-sm text-neutral-800 dark:text-neutral-200 select-none"
                 >
                   Administrador
+                </label>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <input
+                  id="isActive"
+                  type="checkbox"
+                  {...register("ativo")}
+                  className="cursor-pointer h-4 w-4 rounded border-neutral-300 dark:border-neutral-700 text-fuchsia-700 focus:ring-fuchsia-600"
+                />
+                <label
+                  htmlFor="isActive"
+                  className="cursor-pointer text-sm text-neutral-800 dark:text-neutral-200 select-none"
+                >
+                  Ativo
                 </label>
               </div>
 

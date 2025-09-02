@@ -25,11 +25,17 @@ function getStoredUsers(): tUserPersisted[] {
     // Migrate: ensure each user has an id
     let mutated = false;
     const withIds = parsed.map((u) => {
-      if (!(u as any).id) {
+      let next = u as any;
+      if (!next.id) {
         mutated = true;
-        return { id: generateId(), ...(u as object) } as tUserPersisted;
+        next = { id: generateId(), ...(u as object) } as tUserPersisted;
       }
-      return u as tUserPersisted;
+      // Ensure "ativo" exists; default to true for legacy records
+      if (typeof next.ativo === "undefined") {
+        mutated = true;
+        next = { ...next, ativo: true };
+      }
+      return next as tUserPersisted;
     });
 
     if (mutated) {
@@ -51,7 +57,11 @@ export class LocalStorageUserService implements IUserServices {
   async create(user: tUserCreateDto): Promise<void> {
     const { senhaConfirm, ...persist } = user;
     const current = getStoredUsers();
-    const newUser: tUserPersisted = { id: generateId(), ...persist } as tUserPersisted;
+    const newUser: tUserPersisted = {
+      id: generateId(),
+      // Persist all fields from DTO (including ativo)
+      ...persist,
+    } as tUserPersisted;
     current.push(newUser);
     setStoredUsers(current);
   }
@@ -65,6 +75,7 @@ export class LocalStorageUserService implements IUserServices {
         ...u,
         dataNascimento:
           maybeDate ? new Date(maybeDate as unknown as string) : undefined,
+        ativo: (u as any).ativo ?? true,
       } as tUserPersisted;
     });
     if (!query) return normalized;
@@ -90,6 +101,43 @@ export class LocalStorageUserService implements IUserServices {
     }
 
     return filtered;
+  }
+
+  async findById(id: string): Promise<tUserPersisted | null> {
+    const all = getStoredUsers();
+    const found = all.find((u) => u.id === id);
+    if (!found) return null;
+    const maybeDate = (found as any).dataNascimento as any;
+    return {
+      ...found,
+      dataNascimento: maybeDate ? new Date(maybeDate as unknown as string) : undefined,
+    } as tUserPersisted;
+  }
+
+  async update(
+    id: string,
+    changes: Partial<Omit<tUserPersisted, "id">>
+  ): Promise<tUserPersisted> {
+    const all = getStoredUsers();
+    const idx = all.findIndex((u) => u.id === id);
+    if (idx === -1) {
+      throw new Error("User not found");
+    }
+
+    const updated: tUserPersisted = {
+      ...all[idx],
+      ...changes,
+      id,
+    } as tUserPersisted;
+
+    all[idx] = updated;
+    setStoredUsers(all);
+
+    const maybeDate = (updated as any).dataNascimento as any;
+    return {
+      ...updated,
+      dataNascimento: maybeDate ? new Date(maybeDate as unknown as string) : undefined,
+    } as tUserPersisted;
   }
 }
 

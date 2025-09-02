@@ -5,4 +5,11 @@ export interface IUserServices {
   create(user: tUserCreateDto): Promise<void>;
   // Returns users based on optional query params
   findAll(query?: tUserListQuery): Promise<tUserPersisted[]>;
+  // Returns a single user by id (or null if not found)
+  findById(id: string): Promise<tUserPersisted | null>;
+  // Updates a user by id with partial changes and returns the updated entity
+  update(
+    id: string,
+    changes: Partial<Omit<tUserPersisted, "id">>
+  ): Promise<tUserPersisted>;
 }

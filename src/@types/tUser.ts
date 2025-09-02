@@ -6,6 +6,7 @@ export type tUserCreateDto = {
   senhaConfirm: string;
   dataNascimento?: Date;
   isAdm: boolean;
+  ativo: boolean; // indica se o usuário está ativo/inativo
 };
 
 export type tUserPersisted = { id: string } & Omit<tUserCreateDto, "senhaConfirm">;

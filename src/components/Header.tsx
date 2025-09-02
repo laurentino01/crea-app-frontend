@@ -50,7 +50,11 @@ export default function Header() {
   useEffect(() => {
     let slug = pathname.slice(1);
 
-    setCurrentPage(slug.slice(0, slug.indexOf("/")));
+    if (slug.includes("/")) {
+      setCurrentPage(slug.slice(0, slug.indexOf("/")));
+    } else {
+      setCurrentPage(slug);
+    }
   }, [pathname]);
 
   return (
