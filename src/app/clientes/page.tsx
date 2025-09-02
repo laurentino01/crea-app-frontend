@@ -1,6 +1,7 @@
 "use client";
 
 import { Mail, MapPin, Phone, Plus, Shield, Tag, X } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import SearchInput from "@/components/SearchInput";
 import Card from "@/components/Card";
@@ -419,14 +420,12 @@ export default function Clientes() {
 
                     {/* Actions */}
                     <div className="flex gap-2">
-                      <button
+                      <Link
+                        href={`/clientes/${c.id}`}
                         className="px-3 py-2 rounded-full font-bold text-[13px] bg-fuchsia-900 text-neutral-100 transition-colors duration-200 hover:bg-fuchsia-400 active:bg-fuchsia-950 cursor-pointer"
-                        onClick={() => {
-                          /* Placeholder: sem navegação para detalhes ainda */
-                        }}
                       >
                         Ver mais
-                      </button>
+                      </Link>
                     </div>
                   </Card>
                 );
