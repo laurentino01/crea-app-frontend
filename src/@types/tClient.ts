@@ -1,6 +1,7 @@
 export type tClientCreateDto = {
   nome: string;
   email: string;
+  telefone: string;
   endereco: string;
   categoria: string;
   descricao: string;

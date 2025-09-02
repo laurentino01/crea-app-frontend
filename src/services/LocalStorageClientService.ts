@@ -33,6 +33,10 @@ function getStoredClients(): tClientPersisted[] {
         mutated = true;
         next = { ...next, ativo: true };
       }
+      if (typeof next.telefone === "undefined") {
+        mutated = true;
+        next = { ...next, telefone: "" };
+      }
       return next as tClientPersisted;
     });
 
@@ -85,9 +89,13 @@ export class LocalStorageClientService implements IClientServices {
       filtered = filtered.filter((c) => {
         const nome = c.nome?.toLowerCase() ?? "";
         const email = c.email?.toLowerCase() ?? "";
+        const telefone = c.telefone?.toLowerCase() ?? "";
         const descricao = c.descricao?.toLowerCase() ?? "";
         return (
-          nome.includes(term) || email.includes(term) || descricao.includes(term)
+          nome.includes(term) ||
+          email.includes(term) ||
+          telefone.includes(term) ||
+          descricao.includes(term)
         );
       });
     }
@@ -125,4 +133,3 @@ export class LocalStorageClientService implements IClientServices {
 
 // Convenient default instance
 export const clientService = new LocalStorageClientService();
-
