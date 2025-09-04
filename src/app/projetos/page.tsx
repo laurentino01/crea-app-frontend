@@ -120,6 +120,8 @@ export default function Projetos() {
   }, [projects, page]);
 
   const etapaProgressPct = (e: tProjetoEtapa) => {
+    // Projeto descontinuado deve exibir 0%
+    if (e === ProjetoEtapa.Descontinuado) return 0;
     const idx = etapaOptions.findIndex((x) => x.value === e);
     if (idx < 0) return 0;
     const pct = Math.round(((idx + 1) / etapaOptions.length) * 100);

@@ -1,5 +1,6 @@
 import {
   ProjetoEtapa,
+  ProjetoEtapaStatus,
   tChat,
   tEquipe,
   tIdUsuario,
@@ -7,6 +8,7 @@ import {
   tProjectListQuery,
   tProjectPersisted,
   tProjetoHistoricoItem,
+  tProjetoEtapaItem,
 } from "../@types/tProject";
 import { IProjectServices } from "../interfaces/IProjectServices";
 
@@ -41,6 +43,7 @@ function getStoredProjects(): tProjectPersisted[] {
       const historico = Array.isArray(proj.historico) ? proj.historico : [];
       const chat = Array.isArray(proj.chat) ? proj.chat : [];
       const equipe = Array.isArray(proj.equipe) ? proj.equipe : [];
+      const etapas = Array.isArray(proj.etapas) ? proj.etapas : [];
       return {
         ...proj,
         dataInicio: reviveDate(proj.dataInicio)!,
@@ -52,6 +55,11 @@ function getStoredProjects(): tProjectPersisted[] {
         })),
         chat,
         equipe,
+        etapas: etapas.map((e: any) => ({
+          ...e,
+          dataInicio: reviveDate(e?.dataInicio),
+          dataFim: reviveDate(e?.dataFim),
+        })),
       } as tProjectPersisted;
     });
     return normalized;
@@ -65,6 +73,24 @@ function setStoredProjects(projects: tProjectPersisted[]): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
 }
 
+// Ordem base das etapas do workflow (sem Concluido/Descontinuado)
+const BASE_WORKFLOW_ORDER: ProjetoEtapa[] = [
+  ProjetoEtapa.AguardandoArquivos,
+  ProjetoEtapa.Decupagem,
+  ProjetoEtapa.Revisao,
+  ProjetoEtapa.Sonorizacao,
+  ProjetoEtapa.PosProducao,
+  ProjetoEtapa.Analise,
+];
+
+function broadcastProjectUpdated(id: string) {
+  if (!isBrowser()) return;
+  try {
+    const evt = new CustomEvent("project-updated", { detail: { id } });
+    window.dispatchEvent(evt);
+  } catch {}
+}
+
 export class LocalStorageProjectService implements IProjectServices {
   async create(project: tProjectCreateDto): Promise<void> {
     const all = getStoredProjects();
@@ -75,8 +101,18 @@ export class LocalStorageProjectService implements IProjectServices {
       equipe: project.equipe ?? [],
       ...project,
     } as tProjectPersisted;
+    // Inicializa etapas se não vierem do DTO
+    if (!Array.isArray(newProject.etapas) || newProject.etapas.length === 0) {
+      newProject.etapas = BASE_WORKFLOW_ORDER.map((et) => ({
+        id: generateId(),
+        idProjeto: newProject.id,
+        etapa: et,
+        status: ProjetoEtapaStatus.NaoIniciado,
+      }));
+    }
     all.push(newProject);
     setStoredProjects(all);
+    broadcastProjectUpdated(newProject.id);
   }
 
   async findAll(query?: tProjectListQuery): Promise<tProjectPersisted[]> {
@@ -141,6 +177,7 @@ export class LocalStorageProjectService implements IProjectServices {
 
     all[idx] = updated;
     setStoredProjects(all);
+    broadcastProjectUpdated(id);
     return updated;
   }
 
@@ -165,6 +202,7 @@ export class LocalStorageProjectService implements IProjectServices {
     updated.historico = [...(updated.historico ?? []), historicoItem];
     all[idx] = updated;
     setStoredProjects(all);
+    broadcastProjectUpdated(id);
     return updated;
   }
 
@@ -186,6 +224,7 @@ export class LocalStorageProjectService implements IProjectServices {
     } as tProjectPersisted;
     all[idx] = updated;
     setStoredProjects(all);
+    broadcastProjectUpdated(projectId);
     return item;
   }
 
@@ -208,6 +247,7 @@ export class LocalStorageProjectService implements IProjectServices {
     } as tProjectPersisted;
     all[idx] = updated;
     setStoredProjects(all);
+    broadcastProjectUpdated(projectId);
     return newChat;
   }
 
@@ -237,6 +277,7 @@ export class LocalStorageProjectService implements IProjectServices {
     updated.historico = [...(updated.historico ?? []), historicoItem];
     all[idx] = updated;
     setStoredProjects(all);
+    broadcastProjectUpdated(projectId);
     return updated;
   }
 
@@ -264,6 +305,7 @@ export class LocalStorageProjectService implements IProjectServices {
     }
     all[idx] = updated;
     setStoredProjects(all);
+    broadcastProjectUpdated(projectId);
     return updated;
   }
 
@@ -312,6 +354,147 @@ export class LocalStorageProjectService implements IProjectServices {
     updated.historico = [...(updated.historico ?? []), historicoItem];
     all[idx] = updated;
     setStoredProjects(all);
+    broadcastProjectUpdated(projectId);
+    return updated;
+  }
+
+  // ====== Workflow por etapa ======
+  async getEtapas(projectId: string): Promise<tProjetoEtapaItem[]> {
+    const proj = await this.findById(projectId);
+    return (proj?.etapas ?? []) as tProjetoEtapaItem[];
+  }
+
+  async updateEtapaItem(
+    projectId: string,
+    etapa: ProjetoEtapa,
+    changes: Partial<Omit<tProjetoEtapaItem, "id" | "idProjeto" | "etapa">>
+  ): Promise<tProjetoEtapaItem> {
+    const all = getStoredProjects();
+    const pIdx = all.findIndex((p) => p.id === projectId);
+    if (pIdx === -1) throw new Error("Project not found");
+    const etapas = [...(all[pIdx].etapas ?? [])] as tProjetoEtapaItem[];
+    let eIdx = etapas.findIndex((e) => e.etapa === etapa);
+    // Se a etapa não existir ainda (projetos antigos ou dados inconsistentes), cria-a
+    if (eIdx === -1) {
+      const newItem: tProjetoEtapaItem = {
+        id: generateId(),
+        idProjeto: projectId,
+        etapa,
+        status: ProjetoEtapaStatus.NaoIniciado,
+      } as tProjetoEtapaItem;
+      etapas.push(newItem);
+      eIdx = etapas.length - 1;
+    }
+
+    const prev = etapas[eIdx];
+    let next: tProjetoEtapaItem = { ...prev, ...changes } as tProjetoEtapaItem;
+
+    // Regras automáticas de datas conforme status
+    if (changes.status) {
+      if (
+        changes.status === ProjetoEtapaStatus.EmAndamento &&
+        !next.dataInicio
+      ) {
+        next.dataInicio = new Date();
+      }
+      if (changes.status === ProjetoEtapaStatus.Concluido && !next.dataFim) {
+        next.dataFim = new Date();
+      }
+      if (changes.status === ProjetoEtapaStatus.Descontinuado) {
+        if (!next.dataInicio) next.dataInicio = new Date();
+        if (!next.dataFim) next.dataFim = new Date();
+      }
+    }
+
+    etapas[eIdx] = next;
+    const updated = { ...all[pIdx], etapas } as tProjectPersisted;
+
+    // Se definiu responsável na etapa, vira responsável do projeto
+    if (changes.responsavel) {
+      updated.responsavel = changes.responsavel;
+      const historicoItem: tProjetoHistoricoItem = {
+        titulo: "Responsável de etapa definido",
+        descricao: `Etapa ${etapa}: responsável ${changes.responsavel}`,
+        idProjeto: projectId,
+        data: new Date(),
+      };
+      updated.historico = [...(updated.historico ?? []), historicoItem];
+    }
+
+    all[pIdx] = updated;
+    setStoredProjects(all);
+    broadcastProjectUpdated(projectId);
+    return next;
+  }
+
+  async setProjetoConcluido(projectId: string): Promise<tProjectPersisted> {
+    const all = getStoredProjects();
+    const idx = all.findIndex((p) => p.id === projectId);
+    if (idx === -1) throw new Error("Project not found");
+    const etapas = (all[idx].etapas ?? []) as tProjetoEtapaItem[];
+    const now = new Date();
+    const nextEtapas = etapas.map((e) => {
+      if (e.status === ProjetoEtapaStatus.Descontinuado) return e;
+      return {
+        ...e,
+        status: ProjetoEtapaStatus.Concluido,
+        dataInicio: e.dataInicio ?? now,
+        dataFim: e.dataFim ?? now,
+      } as tProjetoEtapaItem;
+    });
+    const updated: tProjectPersisted = {
+      ...all[idx],
+      etapas: nextEtapas,
+      etapa: ProjetoEtapa.Concluido,
+      dataFimReal: all[idx].dataFimReal ?? now,
+      historico: [
+        ...(all[idx].historico ?? []),
+        {
+          titulo: "Projeto concluído",
+          descricao: "Todas as etapas marcadas como concluídas",
+          idProjeto: projectId,
+          data: now,
+        },
+      ],
+    } as tProjectPersisted;
+    all[idx] = updated;
+    setStoredProjects(all);
+    broadcastProjectUpdated(projectId);
+    return updated;
+  }
+
+  async setProjetoDescontinuado(
+    projectId: string,
+    motivo?: string
+  ): Promise<tProjectPersisted> {
+    const all = getStoredProjects();
+    const idx = all.findIndex((p) => p.id === projectId);
+    if (idx === -1) throw new Error("Project not found");
+    const etapas = (all[idx].etapas ?? []) as tProjetoEtapaItem[];
+    const now = new Date();
+    const nextEtapas = etapas.map((e) => ({
+      ...e,
+      status: ProjetoEtapaStatus.Descontinuado,
+      dataInicio: e.dataInicio ?? now,
+      dataFim: e.dataFim ?? now,
+    }));
+    const updated: tProjectPersisted = {
+      ...all[idx],
+      etapas: nextEtapas,
+      etapa: ProjetoEtapa.Descontinuado,
+      historico: [
+        ...(all[idx].historico ?? []),
+        {
+          titulo: "Projeto descontinuado",
+          descricao: motivo?.trim() || "Marcado como descontinuado",
+          idProjeto: projectId,
+          data: now,
+        },
+      ],
+    } as tProjectPersisted;
+    all[idx] = updated;
+    setStoredProjects(all);
+    broadcastProjectUpdated(projectId);
     return updated;
   }
 }

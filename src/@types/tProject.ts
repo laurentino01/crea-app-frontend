@@ -25,6 +25,24 @@ export type tIdChat = string;
 export type tProjetoEtapa = ProjetoEtapa;
 export type tProjetoCriticidade = ProjetoCriticidade;
 
+// Status de execução de uma etapa (não confundir com o tipo/"nome" da etapa)
+export enum ProjetoEtapaStatus {
+  NaoIniciado = "nao_iniciado",
+  EmAndamento = "em_andamento",
+  Concluido = "concluido",
+  Descontinuado = "descontinuado",
+}
+
+export type tProjetoEtapaItem = {
+  id: string;
+  idProjeto: tIdProjeto;
+  etapa: tProjetoEtapa; // qual etapa do workflow este item representa
+  status: ProjetoEtapaStatus;
+  dataInicio?: Date;
+  dataFim?: Date;
+  responsavel?: tIdUsuario;
+};
+
 export type tProjetoHistoricoItem = {
   titulo: string;
   descricao: string;
@@ -61,6 +79,7 @@ export type tProjectCreateDto = {
   responsavel: tIdUsuario;
   chat?: tChat[];
   equipe?: tEquipe[];
+  etapas?: tProjetoEtapaItem[]; // status por etapa do workflow
 };
 
 export type tProjectPersisted = { id: tIdProjeto } & tProjectCreateDto;

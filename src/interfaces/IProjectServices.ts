@@ -1,5 +1,6 @@
 import {
   ProjetoEtapa,
+  ProjetoEtapaStatus,
   tChat,
   tEquipe,
   tIdUsuario,
@@ -7,6 +8,7 @@ import {
   tProjectListQuery,
   tProjectPersisted,
   tProjetoHistoricoItem,
+  tProjetoEtapaItem,
 } from "../@types/tProject";
 
 export interface IProjectServices {
@@ -23,6 +25,19 @@ export interface IProjectServices {
   changeEtapa(
     id: string,
     etapa: ProjetoEtapa,
+    motivo?: string
+  ): Promise<tProjectPersisted>;
+
+  // Workflow por etapa
+  getEtapas(projectId: string): Promise<tProjetoEtapaItem[]>;
+  updateEtapaItem(
+    projectId: string,
+    etapa: ProjetoEtapa,
+    changes: Partial<Omit<tProjetoEtapaItem, "id" | "idProjeto" | "etapa">>
+  ): Promise<tProjetoEtapaItem>;
+  setProjetoConcluido(projectId: string): Promise<tProjectPersisted>;
+  setProjetoDescontinuado(
+    projectId: string,
     motivo?: string
   ): Promise<tProjectPersisted>;
 
@@ -55,4 +70,3 @@ export interface IProjectServices {
   ): Promise<tProjectPersisted>;
   removeEquipeMember(projectId: string, userId: tIdUsuario): Promise<tProjectPersisted>;
 }
-
