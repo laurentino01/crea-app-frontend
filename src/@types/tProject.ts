@@ -9,6 +9,13 @@ export enum ProjetoEtapa {
   Concluido = "concluido",
 }
 
+export enum ProjetoCriticidade {
+  Baixa = "baixa",
+  Media = "media",
+  Alta = "alta",
+  Urgente = "urgente",
+}
+
 // IDs auxiliares
 export type tIdProjeto = string;
 export type tIdUsuario = string;
@@ -16,6 +23,7 @@ export type tIdChat = string;
 
 // Tipos auxiliares
 export type tProjetoEtapa = ProjetoEtapa;
+export type tProjetoCriticidade = ProjetoCriticidade;
 
 export type tProjetoHistoricoItem = {
   titulo: string;
@@ -43,6 +51,7 @@ export type tProjectCreateDto = {
   descricao: string;
   urlArquivos: string;
   etapa: tProjetoEtapa;
+  criticidade: tProjetoCriticidade;
   isAtrasado: boolean;
   cliente: string; // id do cliente
   dataInicio: Date;
@@ -59,8 +68,8 @@ export type tProjectPersisted = { id: tIdProjeto } & tProjectCreateDto;
 export type tProjectListQuery = {
   search?: string;
   etapa?: tProjetoEtapa;
+  criticidade?: tProjetoCriticidade;
   isAtrasado?: boolean;
   cliente?: string; // id do cliente
   responsavel?: tIdUsuario;
 };
-

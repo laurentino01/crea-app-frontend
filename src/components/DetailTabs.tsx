@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { usePathname } from "next/navigation";
 
 export type DetailTabItem = {
   label: string;
@@ -22,6 +23,7 @@ export default function DetailTabs({
   justify = "between",
 }: DetailTabsProps) {
   const [hash, setHash] = useState<string>("");
+  const pathname = usePathname();
 
   useEffect(() => {
     const readHash = () => setHash(typeof window !== "undefined" ? window.location.hash : "");
@@ -31,6 +33,33 @@ export default function DetailTabs({
   }, []);
 
   const computedActive = activeHref || hash || (items[0]?.href ?? "");
+
+  const basePath = useMemo(() => {
+    if (!pathname) return "";
+    // Consider relative (non-absolute, non-hash) items as potential suffixes
+    const relItems = items
+      .map((i) => i.href)
+      .filter((h) => h && !h.startsWith("/") && !h.startsWith("#")) as string[];
+
+    for (const rel of relItems) {
+      const suffix = `/${rel}`;
+      if (pathname.endsWith(suffix)) {
+        return pathname.slice(0, -suffix.length) || "/";
+      }
+    }
+    return pathname;
+  }, [items, pathname]);
+
+  function resolveHref(href: string): string {
+    // Hash link
+    if (href.startsWith("#")) return href;
+    // Absolute path
+    if (href.startsWith("/")) return href;
+    // Relative path
+    if (!href) return basePath || "/";
+    const sep = basePath.endsWith("/") ? "" : "/";
+    return `${basePath}${sep}${href}`;
+  }
 
   const justifyClass =
     justify === "start"
@@ -51,11 +80,18 @@ export default function DetailTabs({
       <div className={["flex items-center gap-1", justifyClass].join(" ")}
       >
         {items.map((item) => {
-          const isActive = computedActive === item.href;
+          const target = resolveHref(item.href);
+          // Active rules:
+          // - Hash links: active when hash matches
+          // - Route links: active when pathname equals resolved target
+          const isHash = item.href.startsWith("#");
+          const isActive = isHash
+            ? (computedActive || hash) === item.href
+            : pathname === target;
           return (
             <Link
               key={item.href + item.label}
-              href={item.href}
+              href={target}
               className={[
                 "text-sm px-3 py-1 rounded-full transition-colors",
                 isActive
@@ -71,4 +107,3 @@ export default function DetailTabs({
     </div>
   );
 }
-
