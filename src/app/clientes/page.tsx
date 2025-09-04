@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import SearchInput from "@/components/SearchInput";
 import Card from "@/components/Card";
+import ClientProjectsEtapasDoughnut from "@/components/ClientProjectsEtapasDoughnut";
 import Avatar from "@/components/Avatar";
 import type { tClientPersisted } from "@/@types/tClient";
 import { clientService } from "@/services/LocalStorageClientService";
@@ -412,11 +413,8 @@ export default function Clientes() {
                       </div>
                     </div>
 
-                    {/* Projects (placeholder como no modelo) */}
-                    <div className="bg-neutral-100 dark:bg-white/5 p-3 rounded-lg mb-4">
-                      <div className="text-[13px] text-neutral-500 mb-1">Projetos</div>
-                      <div className="font-extrabold text-lg">0</div>
-                    </div>
+                    {/* Projects Doughnut */}
+                    <ClientProjectsEtapasDoughnut clientId={c.id} className="mb-4" />
 
                     {/* Actions */}
                     <div className="flex gap-2">
