@@ -21,7 +21,7 @@ export default function SideNav() {
   ];
 
   return (
-    <aside className="w-[260px] p-6 bg-fuchsia-900 sticky  border-r border-r-[rgba(11,16,32,0.04)] shadow-[var(--shadow-sm)] flex flex-col gap-[18px] top-0 h-screen overflow-auto">
+    <aside className="w-[260px] p-6 bg-fuchsia-900 sticky shadow flex flex-col gap-3 top-0 h-screen overflow-auto ">
       <div className="flex items-center gap-3">
         <Image
           src="https://www.creamidia.com.br/images/about/logo-about.svg"

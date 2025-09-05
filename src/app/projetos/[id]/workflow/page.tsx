@@ -69,9 +69,8 @@ export default function ProjetoDetalhesWorkflowPage() {
   // Seleção de responsável para movimentar etapa
   const [selectOpen, setSelectOpen] = useState(false);
   const [targetEtapa, setTargetEtapa] = useState<tProjetoEtapa | null>(null);
-  const [selectedResponsavelId, setSelectedResponsavelId] = useState<string>(
-    ""
-  );
+  const [selectedResponsavelId, setSelectedResponsavelId] =
+    useState<string>("");
   const [userNames, setUserNames] = useState<Record<string, string>>({});
 
   // Navegação direta entre etapas
@@ -303,17 +302,7 @@ export default function ProjetoDetalhesWorkflowPage() {
   const equipeIds = new Set((project.equipe ?? []).map((m) => m.idUsuario));
 
   return (
-    <section
-      id="workflow"
-      className="rounded-lg dark:bg-neutral-900 bg-neutral-100 p-4"
-    >
-      <div className="flex items-center mb-4 gap-2">
-        <h2 className="text-base font-semibold">Workflow</h2>
-        <span className="ml-auto text-sm text-neutral-600 dark:text-neutral-300">
-          {etapas.length} etapas
-        </span>
-      </div>
-
+    <>
       {error && (
         <div className="text-sm text-red-600 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded p-2 mb-3">
           {error}
@@ -386,7 +375,10 @@ export default function ProjetoDetalhesWorkflowPage() {
                     )}
                   </div>
                   <div className="text-xs text-neutral-500 mt-0.5">
-                    Responsável: {item?.responsavel ? userNames[item.responsavel] || item.responsavel : "—"}
+                    Responsável:{" "}
+                    {item?.responsavel
+                      ? userNames[item.responsavel] || item.responsavel
+                      : "—"}
                   </div>
                 </div>
                 {(() => {
@@ -467,7 +459,8 @@ export default function ProjetoDetalhesWorkflowPage() {
               </div>
               {(project.equipe ?? []).length === 0 ? (
                 <div className="text-sm text-neutral-500">
-                  Nenhum membro na equipe. Adicione membros na aba Equipe do projeto.
+                  Nenhum membro na equipe. Adicione membros na aba Equipe do
+                  projeto.
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
@@ -505,6 +498,6 @@ export default function ProjetoDetalhesWorkflowPage() {
           </div>
         </div>
       )}
-    </section>
+    </>
   );
 }

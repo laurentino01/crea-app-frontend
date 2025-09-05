@@ -134,12 +134,8 @@ export default function ProjetoDetalheEquipePage() {
   }
 
   return (
-    <section
-      id="equipe"
-      className="rounded-lg dark:bg-neutral-900 bg-neutral-100 p-4"
-    >
+    <>
       <div className="flex items-center mb-4 gap-2">
-        <h2 className="text-base font-semibold">Equipe do Projeto</h2>
         <span className="ml-auto text-sm text-neutral-600 dark:text-neutral-300">
           {project?.equipe?.length || 0} membros
         </span>
@@ -238,6 +234,6 @@ export default function ProjetoDetalheEquipePage() {
           })
         )}
       </div>
-    </section>
+    </>
   );
 }

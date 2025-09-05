@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
 import ProgressBar from "@/components/ProgressBar";
@@ -19,15 +19,30 @@ import type {
 import { ProjetoEtapaStatus } from "@/@types/tProject";
 import DetailTabs from "@/components/DetailTabs";
 
+enum eTabs {
+  informacoes = "informacoes",
+  equipe = "equipe",
+  avaliacoes = "avaliacoes",
+  chat = "chat",
+  historico = "historico",
+  workflow = "workflow",
+}
+
 // Progresso baseado no status por etapa
 function etapasProgressPct(etapas: tProjetoEtapaItem[] | undefined): number {
   if (!etapas || etapas.length === 0) return 0;
-  const allDescont = etapas.every((e) => e.status === ProjetoEtapaStatus.Descontinuado);
+  const allDescont = etapas.every(
+    (e) => e.status === ProjetoEtapaStatus.Descontinuado
+  );
   // Se todas as etapas estão descontinuadas, progresso deve ser 0%
   if (allDescont) return 0;
-  const valid = etapas.filter((e) => e.status !== ProjetoEtapaStatus.Descontinuado);
+  const valid = etapas.filter(
+    (e) => e.status !== ProjetoEtapaStatus.Descontinuado
+  );
   if (valid.length === 0) return 0;
-  const done = valid.filter((e) => e.status === ProjetoEtapaStatus.Concluido).length;
+  const done = valid.filter(
+    (e) => e.status === ProjetoEtapaStatus.Concluido
+  ).length;
   return Math.round((done / valid.length) * 100);
 }
 
@@ -37,12 +52,36 @@ export default function projetoDetalhesLayout({
   children: React.ReactNode;
 }>) {
   const params = useParams<{ id: string }>();
+  const pathName = usePathname();
   const projectId = params?.id as string | undefined;
 
   const [project, setProject] = useState<tProjectPersisted | null>(null);
   const [etapas, setEtapas] = useState<tProjetoEtapaItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentTab, setCurrentTab] = useState<eTabs>(eTabs.informacoes);
+
+  const tabsTitle = {
+    informacoes: { title: "Informações do Projeto" },
+    equipe: { title: "Equipe do Projeto" },
+    avaliacoes: { title: "Avaliação de desempenho" },
+    chat: { title: "Chat do projeto" },
+    historico: { title: "histórico do projeto" },
+    workflow: { title: "workflow do projeto" },
+  };
+
+  useEffect(() => {
+    const pathLenght = pathName.length;
+    const lastBar = pathName.lastIndexOf("/") + 1;
+    let pathSliced: any = pathName.slice(lastBar, pathLenght);
+    const isEnum = Object.values(eTabs).includes(pathSliced as eTabs);
+
+    if (!isEnum) {
+      pathSliced = eTabs.informacoes;
+    }
+
+    setCurrentTab(pathSliced);
+  }, [pathName]);
 
   useEffect(() => {
     async function load() {
@@ -68,6 +107,7 @@ export default function projetoDetalhesLayout({
     if (typeof window !== "undefined") {
       window.addEventListener("project-updated", onUpdated as any);
     }
+
     return () => {
       if (typeof window !== "undefined") {
         window.removeEventListener("project-updated", onUpdated as any);
@@ -116,12 +156,12 @@ export default function projetoDetalhesLayout({
           </div>
         </section>
       )}
-      {/* Tabs */}
+
       <DetailTabs
         items={[
           { label: "Informações", href: `` },
           { label: "Equipe", href: `equipe` },
-          { label: "Avaliações", href: "#avaliacoes" },
+          { label: "Avaliações", href: "avaliacoes" },
           { label: "Chat", href: "#chat" },
           { label: "Histórico", href: "#historico" },
           { label: "Workflow", href: "workflow" },
@@ -129,8 +169,14 @@ export default function projetoDetalhesLayout({
         justify="between"
       />
 
-      {/* Conteúdo específico da página */}
-      {children}
+      <section className="rounded-lg dark:bg-neutral-900 bg-neutral-100 p-4">
+        <div className="flex items-center mb-4 gap-2">
+          <h2 className="text-base font-semibold">
+            {tabsTitle[currentTab].title}
+          </h2>
+        </div>
+        {children}
+      </section>
     </main>
   );
 }
