@@ -22,6 +22,21 @@ export default function ProgressBar({
     lg: "h-3.5",
   };
 
+  // Define dynamic bar color based on progress
+  // 0-24: red, 25-49: orange, 50-74: amber, 75-89: lime, 90-99: green, 100: green (stronger)
+  const barColor =
+    clamped >= 100
+      ? "bg-green-600"
+      : clamped >= 90
+      ? "bg-green-500"
+      : clamped >= 75
+      ? "bg-lime-500"
+      : clamped >= 50
+      ? "bg-amber-500"
+      : clamped >= 25
+      ? "bg-orange-500"
+      : "bg-red-500";
+
   return (
     <div className={`w-full ${className}`}>
       {showLabel && (
@@ -39,7 +54,7 @@ export default function ProgressBar({
         aria-valuenow={clamped}
       >
         <div
-          className="h-full transition-[width] duration-300 ease-out bg-fuchsia-600"
+          className={`h-full transition-[width] duration-300 ease-out ${barColor} transition-colors`}
           style={{ width: `${clamped}%` }}
         />
       </div>

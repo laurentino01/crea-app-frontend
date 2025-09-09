@@ -162,8 +162,8 @@ export default function projetoDetalhesLayout({
           { label: "Informações", href: `` },
           { label: "Equipe", href: `equipe` },
           { label: "Avaliações", href: "avaliacoes" },
-          { label: "Chat", href: "#chat" },
-          { label: "Histórico", href: "#historico" },
+          { label: "Chat", href: "chat" },
+          { label: "Histórico", href: "historico" },
           { label: "Workflow", href: "workflow" },
         ]}
         justify="between"

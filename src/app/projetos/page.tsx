@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import SearchInput from "@/components/SearchInput";
 import Card from "@/components/Card";
 import ProjectEtapaBadge from "@/components/ProjectEtapaBadge";
+import ProgressBar from "@/components/ProgressBar";
 import ProjectCriticidadeBadge from "@/components/ProjectCriticidadeBadge";
 import ProjectPrazoBadge from "@/components/ProjectPrazoBadge";
 import Avatar from "@/components/Avatar";
@@ -508,12 +509,7 @@ export default function Projetos() {
 
                     {/* Progress */}
                     <div className="mb-3">
-                      <div className="h-2 bg-neutral-200 dark:bg-neutral-800 rounded-full overflow-hidden">
-                        <div
-                          className="h-2 bg-fuchsia-600 transition-all"
-                          style={{ width: `${pct}%` }}
-                        />
-                      </div>
+                      <ProgressBar value={pct} size="sm" />
                       <div className="text-[12px] text-neutral-500 mt-1">
                         Progresso: {pct}%
                       </div>
