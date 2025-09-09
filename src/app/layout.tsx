@@ -4,6 +4,7 @@ import "./globals.css";
 import SideNav from "@/components/SideNav";
 import { ThemeProvider } from "next-themes";
 import Header from "@/components/Header";
+import DevMockInitializer from "@/components/DevMockInitializer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -44,6 +45,8 @@ export default function RootLayout({
             <SideNav />
 
             <main className="overflow-auto flex-1 p-5 min-h-[200vh]">
+              {/* Inicializa mocks opcionalmente via env var */}
+              <DevMockInitializer />
               <Header />
               {children}
             </main>

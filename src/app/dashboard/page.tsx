@@ -383,7 +383,7 @@ export default function Dashboard() {
               {mockTasks.map((t) => (
                 <tr
                   key={t.id}
-                  className="cursor-pointer transition-all duration-200 hover:bg-neutral-50 dark:hover:bg-neutral-900/60 hover:shadow-md hover:scale-[1.01]"
+                  className="cursor-pointer transition-all duration-200 hover:bg-neutral-50 dark:hover:bg-neutral-700"
                 >
                   <td className="py-3 px-3 align-middle">
                     <div className="max-w-[340px] truncate" title={t.projeto}>
@@ -533,7 +533,7 @@ export default function Dashboard() {
               {rows.map((r) => (
                 <tr
                   key={r.id}
-                  className="cursor-pointer transition-all duration-200 hover:bg-neutral-50 dark:hover:bg-neutral-900/60 hover:shadow-md hover:scale-[1.01]"
+                  className="cursor-pointer transition-all duration-200 hover:bg-neutral-50 dark:hover:bg-neutral-700 hover:shadow-md"
                 >
                   <td className="py-3 px-3 align-middle text-neutral-800 dark:text-neutral-200 max-w-[200px] truncate">
                     {r.membro}

@@ -45,6 +45,10 @@ export default function Header() {
       title: "Ranking",
       explain: "Visão do posicionamento dos membros",
     },
+    dev: {
+      title: "Development",
+      explain: "Visão de desenvolvimento",
+    },
   };
 
   useEffect(() => {
