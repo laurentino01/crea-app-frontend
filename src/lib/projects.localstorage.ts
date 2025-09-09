@@ -314,8 +314,10 @@ export function getProjectsFromLocalStorage(): tProjectPersisted[] | null {
     // Revive Datas e Etapas
     return parsed.map((p) => ({
       ...p,
-      dataInicio: p.dataInicio ? new Date(p.dataInicio as any) : undefined,
-      dataFimPrevisto: p.dataFimPrevisto ? new Date(p.dataFimPrevisto as any) : undefined,
+      // Campos obrigatórios devem sempre ser Date
+      dataInicio: p.dataInicio ? new Date(p.dataInicio as any) : new Date(),
+      dataFimPrevisto: p.dataFimPrevisto ? new Date(p.dataFimPrevisto as any) : new Date(),
+      // Campo opcional permanece opcional
       dataFimReal: p.dataFimReal ? new Date(p.dataFimReal as any) : undefined,
       historico: (p.historico ?? []).map((h) => ({
         ...h,
@@ -331,4 +333,3 @@ export function getProjectsFromLocalStorage(): tProjectPersisted[] | null {
     return null;
   }
 }
-
