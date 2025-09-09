@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="h-full scroll-smooth">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Login • App</title>
+
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      // Config opcional (ex.: fonte, sombras)
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: { sans: ["Inter", "ui-sans-serif", "system-ui"] },
+            boxShadow: {
+              glow: "0 10px 30px rgba(0,0,0,0.12)",
+            },
+          },
+        },
+        darkMode: "class",
+      };
+    </script>
+
+    <!-- Fonte Inter (opcional) -->
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      @keyframes floatSlow {
+        from {
+          transform: translateY(0);
+        }
+        to {
+          transform: translateY(-8px);
+        }
+      }
+      .animate-float {
+        animation: floatSlow 4s ease-in-out infinite alternate;
+      }
+
+      @keyframes shake {
+        10%,
+        90% {
+          transform: translateX(-1px);
+        }
+        20%,
+        80% {
+          transform: translateX(2px);
+        }
+        30%,
+        50%,
+        70% {
+          transform: translateX(-4px);
+        }
+        40%,
+        60% {
+          transform: translateX(4px);
+        }
+      }
+      .animate-shake {
+        animation: shake 450ms cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+      }
+    </style>
+
+    <script>
+      // Tema: respeita preferência e persiste
+      (function initTheme() {
+        const stored = localStorage.getItem("theme");
+        const prefersDark = window.matchMedia(
+          "(prefers-color-scheme: dark)"
+        ).matches;
+        const shouldDark = stored ? stored === "dark" : prefersDark;
+        document.documentElement.classList.toggle("dark", shouldDark);
+      })();
+    </script>
+  </head>
+  <body
+    class="h-full bg-gradient-to-br from-indigo-50 via-slate-50 to-white dark:from-slate-900 dark:via-slate-950 dark:to-black text-slate-800 dark:text-slate-100"
+  >
+    <!-- BG decorativo -->
+    <div class="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+      <svg
+        class="absolute -top-24 -right-24 w-[42rem] opacity-70 blur-3xl animate-float"
+        viewBox="0 0 600 600"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g transform="translate(300,300)">
+          <path
+            d="M120,-161.4C161.9,-144.7,206.7,-121.1,219.5,-85.2C232.3,-49.2,213.1,-1,193.1,47.5C173.2,96,152.6,144.8,117.3,169.1C82,193.4,32.1,193.1,-15.4,199.7C-62.9,206.4,-125.7,219.9,-170.3,201.6C-214.9,183.4,-241.4,133.4,-248.4,82.1C-255.5,30.9,-243, -21.6,-216.4,-63.8C-189.7,-106.1,-148.8,-138.9,-107.4,-157.2C-66.1,-175.6,-24.2,-179.6,13.5,-195.3C51.3,-211,102.6,-238.2,120,-161.4Z"
+            fill="url(#g1)"
+          />
+          <defs>
+            <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#6366f1" />
+              <stop offset="100%" stop-color="#22d3ee" />
+            </linearGradient>
+          </defs>
+        </g>
+      </svg>
+    </div>
+
+    <!-- Barra superior -->
+    <header class="absolute top-0 left-0 right-0">
+      <div
+        class="mx-auto max-w-7xl px-6 py-5 flex items-center justify-between"
+      >
+        <div class="flex items-center gap-3">
+          <div
+            class="h-9 w-9 rounded-xl bg-indigo-600 dark:bg-indigo-500 grid place-items-center shadow-glow"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5 text-white"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <path
+                d="M12 2a10 10 0 1 0 10 10A10.011 10.011 0 0 0 12 2Zm1 15h-2v-2h2Zm0-4h-2V7h2Z"
+              />
+            </svg>
+          </div>
+          <span class="font-semibold">SeuApp</span>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button
+            id="themeToggle"
+            type="button"
+            class="inline-flex items-center gap-2 rounded-xl border border-slate-300/70 dark:border-slate-700/60 px-3 py-2 text-sm shadow-sm hover:bg-white/60 dark:hover:bg-slate-800/60 transition"
+          >
+            <span class="sr-only">Alternar tema</span>
+            <svg
+              id="iconSun"
+              class="h-5 w-5 hidden dark:inline"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <path
+                d="M6.76 4.84l-1.8-1.79L3.17 4.84l1.79 1.79 1.8-1.79zM1 13h3v-2H1v2zm10 10h2v-3h-2v3zM4.22 19.78l1.79 1.79 1.8-1.79-1.8-1.79-1.79 1.79zM20 11v2h3v-2h-3zm-2.76-6.16l1.79-1.79-1.79-1.79-1.79 1.79 1.79 1.79zM13 1h-2v3h2V1zm6.78 18.78l-1.79-1.79-1.79 1.79 1.79 1.79 1.79-1.79zM12 8a4 4 0 100 8 4 4 0 000-8z"
+              />
+            </svg>
+            <svg
+              id="iconMoon"
+              class="h-5 w-5 dark:hidden"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <path d="M20.742 13.045A8 8 0 1111 3a9 9 0 109.742 10.045z" />
+            </svg>
+            <span class="text-xs opacity-80">Tema</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Conteúdo -->
+    <main class="min-h-full flex items-center justify-center px-6 py-16">
+      <div class="w-full max-w-md">
+        <div
+          class="rounded-2xl border border-slate-200/80 dark:border-slate-700/60 bg-white/80 dark:bg-slate-900/70 backdrop-blur-xl shadow-glow p-8"
+        >
+          <div class="mb-6 text-center">
+            <h1 class="text-2xl font-semibold tracking-tight">
+              Bem-vindo de volta
+            </h1>
+            <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
+              Acesse sua conta para continuar
+            </p>
+          </div>
+
+          <!-- Alert -->
+          <div
+            id="alert"
+            class="hidden mb-4 rounded-xl border border-amber-300/70 bg-amber-50 dark:bg-amber-900/20 px-4 py-3 text-sm text-amber-800 dark:text-amber-200"
+          ></div>
+
+          <form id="loginForm" novalidate class="space-y-5">
+            <!-- Email -->
+            <div>
+              <label for="email" class="block text-sm font-medium mb-1"
+                >E-mail</label
+              >
+              <div class="relative">
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  inputmode="email"
+                  autocomplete="email"
+                  required
+                  class="peer w-full rounded-xl border border-slate-300/80 dark:border-slate-700/70 bg-white/70 dark:bg-slate-950/60 px-4 py-3 pr-10 outline-none ring-0 focus:border-indigo-500 focus:outline-none"
+                  placeholder="voce@exemplo.com"
+                />
+                <div
+                  class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 opacity-50"
+                >
+                  <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                    <path
+                      d="M12 12a5 5 0 1 0-5-5 5.006 5.006 0 0 0 5 5Zm0 2c-4.33 0-8 2.17-8 5v1h16v-1c0-2.83-3.67-5-8-5Z"
+                    />
+                  </svg>
+                </div>
+              </div>
+              <p id="emailError" class="mt-1 text-xs text-rose-600 hidden">
+                Informe um e-mail válido.
+              </p>
+            </div>
+
+            <!-- Senha -->
+            <div>
+              <label for="password" class="block text-sm font-medium mb-1"
+                >Senha</label
+              >
+              <div class="relative">
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  autocomplete="current-password"
+                  required
+                  minlength="6"
+                  class="peer w-full rounded-xl border border-slate-300/80 dark:border-slate-700/70 bg-white/70 dark:bg-slate-950/60 px-4 py-3 pr-12 outline-none ring-0 focus:border-indigo-500"
+                  placeholder="••••••••"
+                />
+                <button
+                  type="button"
+                  id="togglePassword"
+                  class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                  aria-label="Mostrar senha"
+                >
+                  <svg
+                    id="eye"
+                    class="h-5 w-5"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path
+                      d="M12 5C7 5 2.73 8.11 1 12c1.73 3.89 6 7 11 7s9.27-3.11 11-7c-1.73-3.89-6-7-11-7Zm0 12a5 5 0 1 1 5-5 5.006 5.006 0 0 1-5 5Z"
+                    />
+                    <circle cx="12" cy="12" r="2.5" />
+                  </svg>
+                  <svg
+                    id="eyeOff"
+                    class="h-5 w-5 hidden"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path
+                      d="M2.81 2.81 1.39 4.22l4.12 4.12C3.75 9.62 2.28 10.69 1 12c1.73 3.89 6 7 11 7a11.7 11.7 0 0 0 5.43-1.31l3.35 3.35 1.41-1.41L2.81 2.81zM12 7a5 5 0 0 1 5 5 4.94 4.94 0 0 1-.58 2.32l-6.74-6.74A4.94 4.94 0 0 1 12 7zm0 10c-5 0-9.27-3.11-11-7a15.59 15.59 0 0 1 4.17-4.6l2.21 2.21A5 5 0 0 0 12 17a4.94 4.94 0 0 0 2.39-.62l1.51 1.51A11.7 11.7 0 0 1 12 17z"
+                    />
+                  </svg>
+                </button>
+              </div>
+              <p id="passwordError" class="mt-1 text-xs text-rose-600 hidden">
+                A senha deve ter pelo menos 6 caracteres.
+              </p>
+            </div>
+
+            <!-- Ações -->
+            <div class="flex items-center justify-between">
+              <label class="inline-flex items-center gap-2 text-sm select-none">
+                <input
+                  id="remember"
+                  type="checkbox"
+                  class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                />
+                Lembrar-me
+              </label>
+              <a
+                href="#"
+                class="text-sm font-medium text-indigo-600 hover:text-indigo-500"
+                >Esqueci minha senha</a
+              >
+            </div>
+
+            <!-- Botão -->
+            <button
+              id="submitBtn"
+              type="submit"
+              class="group inline-flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-3 font-medium text-white shadow-glow hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400 active:scale-[.99] transition"
+            >
+              <span id="btnText">Entrar</span>
+              <svg
+                id="btnSpinner"
+                class="h-5 w-5 animate-spin hidden"
+                viewBox="0 0 24 24"
+                fill="none"
+              >
+                <circle
+                  class="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  stroke-width="4"
+                ></circle>
+                <path
+                  class="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 0 1 8-8v4a4 4 0 0 0-4 4H4z"
+                ></path>
+              </svg>
+            </button>
+
+            <!-- Divider -->
+            <div class="relative py-2 text-center">
+              <div class="absolute inset-0 flex items-center">
+                <div
+                  class="w-full border-t border-slate-200 dark:border-slate-700"
+                ></div>
+              </div>
+              <span
+                class="relative bg-white dark:bg-slate-900 px-3 text-xs text-slate-500"
+                >ou continue com</span
+              >
+            </div>
+
+            <!-- Social -->
+            <div class="grid grid-cols-3 gap-3">
+              <button
+                type="button"
+                class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white/70 dark:bg-slate-950/60 px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              >
+                <span class="sr-only">Entrar com Google</span>
+                <img
+                  alt="Google"
+                  class="h-5 mx-auto"
+                  src="https://www.gstatic.com/devrel-devsite/prod/v0f6a7c8a4a692db9c1dfe7f2a7bc01dbb15d1e1d0d1b7b2d6d1a2f5f8c0a/google/images/lockup.svg"
+                />
+              </button>
+              <button
+                type="button"
+                class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white/70 dark:bg-slate-950/60 px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              >
+                <span class="sr-only">Entrar com GitHub</span>
+                <svg
+                  class="h-5 mx-auto"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path
+                    d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.69c-2.78.61-3.37-1.19-3.37-1.19a2.65 2.65 0 0 0-1.11-1.46c-.91-.62.07-.61.07-.61a2.1 2.1 0 0 1 1.54 1.04 2.14 2.14 0 0 0 2.92.83 2.16 2.16 0 0 1 .64-1.35C7 15.64 4.26 14.7 4.26 10.5a3.91 3.91 0 0 1 1.04-2.71 3.63 3.63 0 0 1 .1-2.67s.85-.27 2.78 1.03a9.52 9.52 0 0 1 5.06 0c1.93-1.3 2.78-1.03 2.78-1.03.38.85.42 1.81.1 2.67a3.91 3.91 0 0 1 1.04 2.71c0 4.21-2.75 5.13-5.37 5.41a2.4 2.4 0 0 1 .68 1.86v2.75c0 .26.18.58.69.48A10 10 0 0 0 12 2"
+                  />
+                </svg>
+              </button>
+              <button
+                type="button"
+                class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white/70 dark:bg-slate-950/60 px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              >
+                <span class="sr-only">Entrar com Microsoft</span>
+                <svg class="h-5 mx-auto" viewBox="0 0 23 23">
+                  <path fill="#f25022" d="M1 1h10v10H1z" />
+                  <path fill="#00a4ef" d="M1 12h10v10H1z" />
+                  <path fill="#7fba00" d="M12 1h10v10H12z" />
+                  <path fill="#ffb900" d="M12 12h10v10H12z" />
+                </svg>
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <p class="mt-6 text-center text-xs text-slate-500">
+          Protegido por reCAPTCHA e sujeito à
+          <a href="#" class="underline hover:no-underline"
+            >Política de Privacidade</a
+          >
+          e <a href="#" class="underline hover:no-underline">Termos</a>.
+        </p>
+      </div>
+    </main>
+
+    <!-- Scripts -->
+    <script>
+      const $ = (sel) => document.querySelector(sel);
+      const email = $("#email");
+      const pass = $("#password");
+      const emailError = $("#emailError");
+      const passwordError = $("#passwordError");
+      const form = $("#loginForm");
+      const submitBtn = $("#submitBtn");
+      const btnText = $("#btnText");
+      const btnSpinner = $("#btnSpinner");
+      const alertBox = $("#alert");
+      const themeToggle = $("#themeToggle");
+      const iconSun = $("#iconSun");
+      const iconMoon = $("#iconMoon");
+      const togglePassword = $("#togglePassword");
+      const eye = $("#eye");
+      const eyeOff = $("#eyeOff");
+
+      // Alternar tema e persistir
+      themeToggle.addEventListener("click", () => {
+        const isDark = document.documentElement.classList.toggle("dark");
+        localStorage.setItem("theme", isDark ? "dark" : "light");
+        iconSun.classList.toggle("hidden", !isDark); // sol aparece no dark
+        iconMoon.classList.toggle("hidden", isDark); // lua no light
+      });
+      // Sincronizar ícones no load
+      (() => {
+        const isDark = document.documentElement.classList.contains("dark");
+        iconSun.classList.toggle("hidden", !isDark);
+        iconMoon.classList.toggle("hidden", isDark);
+      })();
+
+      // Mostrar/ocultar senha
+      togglePassword.addEventListener("click", () => {
+        const isPwd = pass.getAttribute("type") === "password";
+        pass.setAttribute("type", isPwd ? "text" : "password");
+        eye.classList.toggle("hidden", isPwd);
+        eyeOff.classList.toggle("hidden", !isPwd);
+      });
+
+      // Validação simples
+      function validate() {
+        let ok = true;
+        // e-mail simples
+        const mailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim());
+        emailError.classList.toggle("hidden", mailOk);
+        if (!mailOk) {
+          email.classList.add("border-rose-500");
+          ok = false;
+        } else {
+          email.classList.remove("border-rose-500");
+        }
+
+        const passOk = pass.value.length >= 6;
+        passwordError.classList.toggle("hidden", passOk);
+        if (!passOk) {
+          pass.classList.add("border-rose-500");
+          ok = false;
+        } else {
+          pass.classList.remove("border-rose-500");
+        }
+        return ok;
+      }
+
+      // Submissão fake (simula login)
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        alertBox.classList.add("hidden");
+        form.classList.remove("animate-shake");
+
+        if (!validate()) {
+          form.classList.add("animate-shake");
+          return;
+        }
+
+        submitBtn.disabled = true;
+        btnText.textContent = "Entrando...";
+        btnSpinner.classList.remove("hidden");
+
+        // Simula requisição
+        await new Promise((r) => setTimeout(r, 900));
+
+        // Exemplo: credenciais inválidas
+        const fakeOk = false;
+        if (!fakeOk) {
+          alertBox.textContent =
+            "Credenciais inválidas. Verifique e tente novamente.";
+          alertBox.classList.remove("hidden");
+          submitBtn.disabled = false;
+          btnText.textContent = "Entrar";
+          btnSpinner.classList.add("hidden");
+          form.classList.add("animate-shake");
+          return;
+        }
+
+        // Sucesso (redirecionar)
+        window.location.href = "/dashboard";
+      });
+
+      // Acessibilidade: Enter confirma foco no botão
+      [email, pass].forEach((el) => {
+        el.addEventListener("keydown", (ev) => {
+          if (ev.key === "Enter") {
+            submitBtn.focus();
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

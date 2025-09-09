@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Mail, Phone, MapPin, Tag, User } from "lucide-react";
 import Avatar from "@/components/Avatar";
-import Card from "@/components/Card";
 import DetailTabs from "@/components/DetailTabs";
 import type { tClientPersisted } from "@/@types/tClient";
 import { fetchClientById } from "@/usecases/fetchClientById";
@@ -45,7 +44,7 @@ export default function ClienteDetalhes({ params }: PageProps) {
         setClient(result);
       } catch (e) {
         if (!alive) return;
-        setError("Não foi possível carregar o cliente.");
+        setError("Não foi possível carregar o cliente." + e);
       } finally {
         if (alive) setLoading(false);
       }
@@ -164,7 +163,7 @@ export default function ClienteDetalhes({ params }: PageProps) {
                         setEditing(false);
                         setSaveMsg("Alterações salvas com sucesso.");
                       } catch (e) {
-                        setError("Não foi possível salvar as alterações.");
+                        setError("Não foi possível salvar as alterações." + e);
                       } finally {
                         setSaving(false);
                       }

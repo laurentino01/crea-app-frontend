@@ -2,17 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import {
-  Calendar,
-  Hash,
-  Mail,
-  Shield,
-  ArrowLeft,
-  User,
-  Lock,
-} from "lucide-react";
+import { Calendar, Mail, Shield, ArrowLeft, User } from "lucide-react";
 import Avatar from "@/components/Avatar";
-import Card from "@/components/Card";
 import DetailTabs from "@/components/DetailTabs";
 import type { tUserPersisted } from "@/@types/tUser";
 import { fetchUserById } from "@/usecases/fetchUserById";
@@ -225,7 +216,9 @@ export default function UsuarioDetalhes({ params }: PageProps) {
           )}
         </div>
         {saveMsg && (
-          <div className="text-green-700 dark:text-green-400 text-sm">{saveMsg}</div>
+          <div className="text-green-700 dark:text-green-400 text-sm">
+            {saveMsg}
+          </div>
         )}
         {loading && (
           <div className="text-neutral-600 dark:text-neutral-400">

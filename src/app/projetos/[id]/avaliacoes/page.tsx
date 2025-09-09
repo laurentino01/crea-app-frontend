@@ -19,7 +19,7 @@ import { pontuacaoService } from "@/services/LocalStoragePontuacaoService";
 import { recomputePontuacao } from "@/usecases/recomputePontuacao";
 import { seedCriteriosToLocalStorage } from "@/lib/criterios.localstorage";
 
-export default function projetoDetalhesAvaliacoes() {
+export default function ProjetoDetalhesAvaliacoes() {
   const params = useParams<{ id: string }>();
   const projectId = params?.id as string | undefined;
 
@@ -156,7 +156,8 @@ export default function projetoDetalhesAvaliacoes() {
     const pos = new Set<string>();
     const adv = new Set<string>();
     avals.forEach((a) => {
-      if (a.idCriterio.tipoCriterio === TipoCriterio.Positivo) pos.add(a.idCriterio.id);
+      if (a.idCriterio.tipoCriterio === TipoCriterio.Positivo)
+        pos.add(a.idCriterio.id);
       if (a.idCriterio.tipoCriterio === TipoCriterio.Advertencia)
         adv.add(a.idCriterio.id);
     });
