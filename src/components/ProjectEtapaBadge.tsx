@@ -3,6 +3,7 @@
 import React from "react";
 import type { tProjetoEtapa } from "@/@types/tProject";
 import { ProjetoEtapa } from "@/@types/tProject";
+import { ETAPA_COLORS } from "@/constants/etapaColors";
 
 type Props = {
   etapa: tProjetoEtapa;
@@ -36,13 +37,12 @@ export default function ProjectEtapaBadge({ etapa, className }: Props) {
   return (
     <span
       className={
-        "inline-flex items-center gap-2 bg-neutral-100 dark:bg-white/5 px-2 py-1 rounded-full " +
+        "inline-flex text-sm items-center gap-2 bg-neutral-100 dark:bg-white/5 px-2 py-1 rounded-full " +
         (className || "")
       }
+      style={{ backgroundColor: ETAPA_COLORS[etapa] }}
     >
-      <span className="w-2 h-2 rounded-full bg-fuchsia-600" />
       {etapaLabel(etapa)}
     </span>
   );
 }
-

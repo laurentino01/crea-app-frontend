@@ -2,7 +2,7 @@ import React from "react";
 
 type AvatarProps = {
   name: string;
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "md" | "lg" | "xl";
   className?: string;
 };
 
@@ -38,7 +38,11 @@ function gradientFromName(name: string) {
   return `linear-gradient(${angle}deg, hsl(${h1} ${s1}% ${l1}%), hsl(${h2} ${s2}% ${l2}%))`;
 }
 
-export default function Avatar({ name, size = "md", className = "" }: AvatarProps) {
+export default function Avatar({
+  name,
+  size = "md",
+  className = "",
+}: AvatarProps) {
   const initials = name
     .split(" ")
     .filter(Boolean)
@@ -51,6 +55,7 @@ export default function Avatar({ name, size = "md", className = "" }: AvatarProp
     sm: "w-8 h-8 text-sm",
     md: "w-10 h-10 text-base",
     lg: "w-14 h-14 text-lg",
+    xl: "w-16 h-16 text-xl",
   };
 
   const background = gradientFromName(name || initials || "?");

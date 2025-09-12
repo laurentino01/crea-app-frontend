@@ -10,6 +10,7 @@ import ProjectPrazoBadge from "@/components/ProjectPrazoBadge";
 import { projectService } from "@/services/LocalStorageProjectService";
 import type { tProjectPersisted, tProjetoEtapa } from "@/@types/tProject";
 import { ProjetoEtapa } from "@/@types/tProject";
+import { ETAPA_COLORS } from "@/constants/etapaColors";
 
 type AtrasoFilter = "all" | "late" | "on_time";
 
@@ -125,8 +126,8 @@ export default function ProjetoGerenciamentoModal({
         {/* Header */}
         <div className="flex items-start justify-between mb-6">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 rounded-full flex items-center justify-center font-extrabold text-[18px] text-white ">
-              <Avatar name={clientName || "—"} />
+            <div className="rounded-full flex items-center justify-center font-extrabold  text-white ">
+              <Avatar name={clientName || "—"} size="xl" />
             </div>
             <div className="flex-1 min-w-0">
               <div className="font-extrabold truncate">{clientName || "—"}</div>
@@ -146,97 +147,88 @@ export default function ProjetoGerenciamentoModal({
         </div>
 
         {/* Filtros */}
-
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex flex-col">
-            <label className="text-sm text-neutral-700 dark:text-neutral-300">
-              Início (de)
-            </label>
-            <input
-              type="date"
-              value={startFrom}
-              onChange={(e) => setStartFrom(e.target.value)}
-              className="rounded-md border bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-700 text-neutral-800 dark:text-neutral-200 px-3 py-2 text-sm"
-            />
-          </div>
-          <div className="flex flex-col">
-            <label className="text-sm text-neutral-700 dark:text-neutral-300">
-              Início (até)
-            </label>
-            <input
-              type="date"
-              value={startTo}
-              onChange={(e) => setStartTo(e.target.value)}
-              className="rounded-md border bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-700 text-neutral-800 dark:text-neutral-200 px-3 py-2 text-sm"
-            />
-          </div>
-          <div className="flex flex-col">
-            <label className="text-sm text-neutral-700 dark:text-neutral-300">
-              Fim previsto (de)
-            </label>
-            <input
-              type="date"
-              value={endFrom}
-              onChange={(e) => setEndFrom(e.target.value)}
-              className="rounded-md border bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-700 text-neutral-800 dark:text-neutral-200 px-3 py-2 text-sm"
-            />
-          </div>
-          <div className="flex flex-col">
-            <label className="text-sm text-neutral-700 dark:text-neutral-300">
-              Fim previsto (até)
-            </label>
-            <input
-              type="date"
-              value={endTo}
-              onChange={(e) => setEndTo(e.target.value)}
-              className="rounded-md border bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-700 text-neutral-800 dark:text-neutral-200 px-3 py-2 text-sm"
-            />
-          </div>
-        </div>
-
-        <div className="w-full bg-neutral-50 dark:bg-neutral-900  px-3 rounded-lg flex flex-col gap-3 md:flex-row md:items-end md:justify-between mb-4">
-          <div className="flex-1 min-w-[220px]">
-            <SearchInput
-              placeholder="Buscar por nome do projeto"
-              value={search}
-              onChange={setSearch}
-              size="md"
-            />
-          </div>
-          <div className="flex flex-wrap items-end gap-3">
-            <div className="flex flex-col">
-              <label className="text-sm text-neutral-700 dark:text-neutral-300">
-                Etapa
-              </label>
-              <select
-                value={etapa}
-                onChange={(e) =>
-                  setEtapa((e.target.value as "all" | tProjetoEtapa) ?? "all")
-                }
-                className="cursor-pointer rounded-md border bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-700 text-neutral-800 dark:text-neutral-200 px-3 py-2 text-sm"
-              >
-                <option value="all">Todas</option>
-                {etapaOptions.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="flex flex-col">
-              <label className="text-sm text-neutral-700 dark:text-neutral-300">
-                Prazo
-              </label>
+        <div className="flex justify-between items-end mb-10">
+          {/* Filtros: Prazo e Previsão (data fim prevista) */}
+          <div className="flex gap-5">
+            <label htmlFor="prazo">
+              Prazo
               <select
                 value={prazo}
+                id="prazo"
                 onChange={(e) => setPrazo(e.target.value as AtrasoFilter)}
                 className="cursor-pointer rounded-md border bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-700 text-neutral-800 dark:text-neutral-200 px-3 py-2 text-sm"
               >
-                <option value="all">Todos</option>
+                <option value="all">Prazo</option>
                 <option value="late">Atrasados</option>
                 <option value="on_time">Em dia</option>
               </select>
-            </div>
+            </label>
+
+            <label className="">
+              Previsão
+              <input
+                type="date"
+                value={endFrom}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setEndFrom(v);
+                  setEndTo(v);
+                }}
+                className="cursor-pointer rounded-md border bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-700 text-neutral-800 dark:text-neutral-200 px-3 py-2 text-sm"
+              />
+            </label>
+          </div>
+
+          {/* Filtros por Etapa */}
+          <div className="w-full justify-end flex">
+            {(
+              [
+                ProjetoEtapa.AguardandoArquivos,
+                ProjetoEtapa.Decupagem,
+                ProjetoEtapa.Revisao,
+                ProjetoEtapa.Sonorizacao,
+                ProjetoEtapa.PosProducao,
+                ProjetoEtapa.Analise,
+                ProjetoEtapa.Concluido,
+              ] as tProjetoEtapa[]
+            ).map((et) => {
+              const isActive = etapa === et;
+              const label = (() => {
+                switch (et) {
+                  case ProjetoEtapa.AguardandoArquivos:
+                    return "Aguardando Arquivos";
+                  case ProjetoEtapa.Decupagem:
+                    return "Decupagem";
+                  case ProjetoEtapa.Revisao:
+                    return "Revisão";
+                  case ProjetoEtapa.Sonorizacao:
+                    return "Sonorização";
+                  case ProjetoEtapa.PosProducao:
+                    return "Pós-Produção";
+                  case ProjetoEtapa.Analise:
+                    return "Análise";
+                  case ProjetoEtapa.Concluido:
+                    return "Concluído";
+                  default:
+                    return String(et);
+                }
+              })();
+              return (
+                <button
+                  key={et}
+                  className={
+                    "text-sm rounded-full px-3 py-2 cursor-pointer transition-colors" +
+                    (isActive
+                      ? " text-white"
+                      : "  text-neutral-900 dark:text-neutral-100 hover:bg-neutral-200 dark:hover:bg-neutral-700")
+                  }
+                  style={isActive ? { backgroundColor: ETAPA_COLORS[et] } : {}}
+                  onClick={() => setEtapa((prev) => (prev === et ? "all" : et))}
+                >
+                  {label}
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -251,7 +243,7 @@ export default function ProjetoGerenciamentoModal({
               <Link
                 key={p.id}
                 href={`/projetos/${p.id}`}
-                className="block rounded-lg border border-neutral-200 dark:border-neutral-800 p-3 hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors"
+                className="block rounded-lg  shadow p-3 dark:hover:bg-neutral-800/50 transition-colors"
               >
                 <div className="font-semibold mb-2 truncate">{p.nome}</div>
                 <div className="flex items-center gap-2 flex-wrap">

@@ -1,22 +1,10 @@
 "use client";
 
-import {
-  CardSim,
-  Eye,
-  Folder,
-  IdCard,
-  List,
-  Pencil,
-  Plus,
-  X,
-} from "lucide-react";
+import { CardSim, Eye, Folder, IdCard, List, Pencil, Plus } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import SearchInput from "@/components/SearchInput";
 import Card from "@/components/Card";
-import ProjectEtapaBadge from "@/components/ProjectEtapaBadge";
-import ProgressBar from "@/components/ProgressBar";
-import ProjectCriticidadeBadge from "@/components/ProjectCriticidadeBadge";
-import ProjectPrazoBadge from "@/components/ProjectPrazoBadge";
+
 import Avatar from "@/components/Avatar";
 import Link from "next/link";
 import { projectService } from "@/services/LocalStorageProjectService";
@@ -39,6 +27,7 @@ import {
   Legend,
   ChartOptions,
 } from "chart.js";
+import { ETAPA_COLORS, ETAPA_ORDER as ORDER } from "@/constants/etapaColors";
 
 type AtrasoFilter = "all" | "late" | "on_time";
 
@@ -299,27 +288,7 @@ export default function Projetos() {
   // ---- Chart helpers ----
   ChartJS.register(ArcElement, Tooltip, Legend);
 
-  const ETAPA_COLORS: Record<tProjetoEtapa, string> = {
-    [ProjetoEtapa.AguardandoArquivos]: "#8b5cf6", // violet-500
-    [ProjetoEtapa.Decupagem]: "#ec4899", // pink-500
-    [ProjetoEtapa.Revisao]: "#f59e0b", // amber-500
-    [ProjetoEtapa.Sonorizacao]: "#06b6d4", // cyan-500
-    [ProjetoEtapa.PosProducao]: "#10b981", // emerald-500
-    [ProjetoEtapa.Analise]: "#6366f1", // indigo-500
-    [ProjetoEtapa.Concluido]: "#22c55e", // green-500
-    [ProjetoEtapa.Descontinuado]: "#9ca3af", // gray-400
-  };
-
-  const ORDER: tProjetoEtapa[] = [
-    ProjetoEtapa.AguardandoArquivos,
-    ProjetoEtapa.Decupagem,
-    ProjetoEtapa.Revisao,
-    ProjetoEtapa.Sonorizacao,
-    ProjetoEtapa.PosProducao,
-    ProjetoEtapa.Analise,
-    ProjetoEtapa.Concluido,
-    ProjetoEtapa.Descontinuado,
-  ];
+  // Colors and order are shared via constants
 
   const etapaLabel = (et: tProjetoEtapa) => {
     switch (et) {
@@ -474,11 +443,14 @@ export default function Projetos() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {pageItems.map((g, idx) => {
                 return (
-                  <Card key={idx}>
+                  <Card
+                    key={idx}
+                    className="h-[506px] flex flex-col justify-between"
+                  >
                     {/* Header */}
                     <div className="flex items-center gap-3 mb-4">
-                      <div className="w-12 h-12 rounded-full flex items-center justify-center font-extrabold text-[18px] text-white ">
-                        <Avatar name={g.clientName} />
+                      <div className="rounded-full flex items-center justify-center font-extrabold text-[18px] text-white ">
+                        <Avatar name={g.clientName} size="lg" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="font-extrabold truncate">
@@ -516,12 +488,12 @@ export default function Projetos() {
                       </div>
 
                       {/* Legenda com totais */}
-                      <div className="mt-3 grid grid-cols-1 gap-1 text-sm">
+                      <div className="mt-5 grid grid-cols-2 gap-1  text-sm">
                         {ORDER.map((et) => {
                           const val = g.byEtapa[et] ?? 0;
                           if (!val) return null;
                           return (
-                            <div key={et} className="flex items-center gap-2">
+                            <div key={et} className="flex items-center gap-2 ">
                               <span
                                 className="inline-block w-3 h-3 rounded-sm"
                                 style={{ backgroundColor: ETAPA_COLORS[et] }}
