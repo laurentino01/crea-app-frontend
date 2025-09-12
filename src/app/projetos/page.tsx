@@ -1,6 +1,15 @@
 "use client";
 
-import { Plus, X } from "lucide-react";
+import {
+  CardSim,
+  Eye,
+  Folder,
+  IdCard,
+  List,
+  Pencil,
+  Plus,
+  X,
+} from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import SearchInput from "@/components/SearchInput";
 import Card from "@/components/Card";
@@ -13,12 +22,23 @@ import Link from "next/link";
 import { projectService } from "@/services/LocalStorageProjectService";
 import { clientService } from "@/services/LocalStorageClientService";
 import { userService } from "@/services/LocalStorageUserService";
+import ClienteModal from "@/components/ClienteModal";
+import ProjetoModal from "@/components/ProjetoModal";
+import ProjetoGerenciamentoModal from "@/components/ProjetoGerenciamentoModal";
 import type {
   tProjectPersisted,
   tProjetoEtapa,
   tProjetoCriticidade,
 } from "@/@types/tProject";
 import { ProjetoEtapa, ProjetoCriticidade } from "@/@types/tProject";
+import { Doughnut } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  ArcElement,
+  Tooltip,
+  Legend,
+  ChartOptions,
+} from "chart.js";
 
 type AtrasoFilter = "all" | "late" | "on_time";
 
@@ -50,9 +70,11 @@ export default function Projetos() {
   const [allUsers, setAllUsers] = useState<
     { id: string; nome: string; apelido?: string }[]
   >([]);
+  const [allCategories, setAllCategories] = useState<string[]>([]);
 
   // Add project modal state
   const [isAddOpen, setIsAddOpen] = useState(false);
+  const [isClienteAddOpen, setIsClienteAddOpen] = useState(false);
   const [nome, setNome] = useState("");
   const [descricao, setDescricao] = useState("");
   const [clienteId, setClienteId] = useState<string>("");
@@ -62,9 +84,16 @@ export default function Projetos() {
     ProjetoCriticidade.Media
   );
   const [selectedEquipe, setSelectedEquipe] = useState<Set<string>>(new Set());
+
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [teamSearch, setTeamSearch] = useState("");
+
+  // Gerenciamento (modal) por cliente
+  const [isManageOpen, setIsManageOpen] = useState(false);
+  const [manageClientId, setManageClientId] = useState<string | null>(null);
+
+  // (Estados internos do modal movidos para componente)
 
   useEffect(() => {
     async function loadLookups() {
@@ -76,6 +105,14 @@ export default function Projetos() {
         Object.fromEntries(clients.map((c) => [c.id, c.nome ?? "—"]))
       );
       setAllClients(clients.map((c) => ({ id: c.id, nome: c.nome })));
+      const cats = Array.from(
+        new Set(
+          clients
+            .map((c) => (c.categoria || "").trim())
+            .filter((c) => c && c.length > 0)
+        )
+      ).sort((a, b) => a.localeCompare(b));
+      setAllCategories(cats);
       setUserNames(
         Object.fromEntries(
           users.map((u) => [u.id, u.nomeCompleto || u.apelido || "—"])
@@ -91,6 +128,19 @@ export default function Projetos() {
     }
     loadLookups();
   }, []);
+
+  async function reloadClients() {
+    const clients = await clientService.findAll();
+    setAllClients(clients.map((c) => ({ id: c.id, nome: c.nome })));
+    const cats = Array.from(
+      new Set(
+        clients
+          .map((c) => (c.categoria || "").trim())
+          .filter((c) => c && c.length > 0)
+      )
+    ).sort((a, b) => a.localeCompare(b));
+    setAllCategories(cats);
+  }
 
   async function reload() {
     const etapa = etapaFilter === "all" ? undefined : etapaFilter;
@@ -111,14 +161,42 @@ export default function Projetos() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search, etapaFilter, atrasoFilter]);
 
+  // ---- Agrupar por cliente ----
+  type tClientGroup = {
+    clientId: string;
+    clientName: string;
+    total: number;
+    byEtapa: Partial<Record<tProjetoEtapa, number>>;
+  };
+
+  const groups = useMemo<tClientGroup[]>(() => {
+    const map = new Map<string, tClientGroup>();
+    for (const p of projects) {
+      const id = p.cliente;
+      const name = clientNames[id] || "—";
+      const g = map.get(id) ?? {
+        clientId: id,
+        clientName: name,
+        total: 0,
+        byEtapa: {},
+      };
+      g.total += 1;
+      g.byEtapa[p.etapa] = (g.byEtapa[p.etapa] ?? 0) + 1;
+      map.set(id, g);
+    }
+    return Array.from(map.values()).sort((a, b) =>
+      a.clientName.localeCompare(b.clientName)
+    );
+  }, [projects, clientNames]);
+
   const totalPages = useMemo(() => {
-    return Math.max(1, Math.ceil(projects.length / pageSize));
-  }, [projects.length]);
+    return Math.max(1, Math.ceil(groups.length / pageSize));
+  }, [groups.length]);
 
   const pageItems = useMemo(() => {
     const start = (page - 1) * pageSize;
-    return projects.slice(start, start + pageSize);
-  }, [projects, page]);
+    return groups.slice(start, start + pageSize);
+  }, [groups, page]);
 
   const etapaProgressPct = (e: tProjetoEtapa) => {
     // Projeto descontinuado deve exibir 0%
@@ -218,8 +296,107 @@ export default function Projetos() {
     }
   };
 
+  // ---- Chart helpers ----
+  ChartJS.register(ArcElement, Tooltip, Legend);
+
+  const ETAPA_COLORS: Record<tProjetoEtapa, string> = {
+    [ProjetoEtapa.AguardandoArquivos]: "#8b5cf6", // violet-500
+    [ProjetoEtapa.Decupagem]: "#ec4899", // pink-500
+    [ProjetoEtapa.Revisao]: "#f59e0b", // amber-500
+    [ProjetoEtapa.Sonorizacao]: "#06b6d4", // cyan-500
+    [ProjetoEtapa.PosProducao]: "#10b981", // emerald-500
+    [ProjetoEtapa.Analise]: "#6366f1", // indigo-500
+    [ProjetoEtapa.Concluido]: "#22c55e", // green-500
+    [ProjetoEtapa.Descontinuado]: "#9ca3af", // gray-400
+  };
+
+  const ORDER: tProjetoEtapa[] = [
+    ProjetoEtapa.AguardandoArquivos,
+    ProjetoEtapa.Decupagem,
+    ProjetoEtapa.Revisao,
+    ProjetoEtapa.Sonorizacao,
+    ProjetoEtapa.PosProducao,
+    ProjetoEtapa.Analise,
+    ProjetoEtapa.Concluido,
+    ProjetoEtapa.Descontinuado,
+  ];
+
+  const etapaLabel = (et: tProjetoEtapa) => {
+    switch (et) {
+      case ProjetoEtapa.AguardandoArquivos:
+        return "Aguardando arquivos";
+      case ProjetoEtapa.Decupagem:
+        return "Decupagem";
+      case ProjetoEtapa.Revisao:
+        return "Revisão";
+      case ProjetoEtapa.Sonorizacao:
+        return "Sonorização";
+      case ProjetoEtapa.PosProducao:
+        return "Pós-produção";
+      case ProjetoEtapa.Analise:
+        return "Análise";
+      case ProjetoEtapa.Concluido:
+        return "Concluído";
+      case ProjetoEtapa.Descontinuado:
+        return "Descontinuado";
+      default:
+        return String(et);
+    }
+  };
+
+  const chartOptions: ChartOptions<"doughnut"> = useMemo(
+    () => ({
+      plugins: {
+        legend: {
+          display: false, // vamos renderizar legenda custom abaixo com totais
+        },
+        tooltip: { enabled: true },
+      },
+      cutout: "65%",
+      responsive: true,
+      maintainAspectRatio: false,
+    }),
+    []
+  );
+
   return (
     <>
+      <div className="flex justify-between gap-3 mb-4">
+        <div className="flex justify-end gap-3 mb-4">
+          <button className="shadow rounded-sm p-2 hover:bg-neutral-800 transition-colors cursor-pointer">
+            <IdCard />
+          </button>
+          <button className="shadow rounded-sm p-2 hover:bg-neutral-800 transition-colors cursor-pointer">
+            <List />
+          </button>
+        </div>
+        <div className="flex justify-end gap-3 mb-4">
+          <div className="flex justify-end">
+            <button
+              className="flex gap-2 items-center bg-fuchsia-900 rounded-full py-2 px-4 text-neutral-50 cursor-pointer hover:bg-purple-400 active:bg-fuchsia-950"
+              onClick={() => {
+                setIsAddOpen(true);
+                setError(null);
+              }}
+            >
+              <Plus size={20} />
+              Adicionar Projeto
+            </button>
+          </div>
+          <div className="flex justify-end">
+            <button
+              className="flex gap-2 items-center bg-fuchsia-900 rounded-full py-2 px-4 text-neutral-50 cursor-pointer hover:bg-purple-400 active:bg-fuchsia-950"
+              onClick={() => {
+                setIsClienteAddOpen(true);
+                setError(null);
+              }}
+            >
+              <Plus size={20} />
+              Adicionar Cliente
+            </button>
+          </div>
+        </div>
+      </div>
       {/* Toolbar */}
       <section className="w-full bg-neutral-50 dark:bg-neutral-900 py-5 px-2 rounded-lg flex flex-col gap-4 md:flex-row md:items-center md:justify-between ">
         <div className="w-full md:max-w-3xl flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
@@ -268,305 +445,116 @@ export default function Projetos() {
             </select>
           </div>
         </div>
-
-        <div className="flex justify-end">
-          <button
-            className="flex gap-2 items-center bg-fuchsia-900 rounded-full py-2 px-4 text-neutral-50 cursor-pointer hover:bg-purple-400 active:bg-fuchsia-950"
-            onClick={() => {
-              setIsAddOpen(true);
-              setError(null);
-            }}
-          >
-            <Plus size={20} />
-            Adicionar Projeto
-          </button>
-        </div>
       </section>
 
-      {/* Add Project Modal */}
-      {isAddOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
-          role="dialog"
-          aria-modal="true"
-          onClick={() => !saving && setIsAddOpen(false)}
-        >
-          <div
-            className="w-full max-w-2xl rounded-lg bg-white dark:bg-neutral-900 p-4 sm:p-6 shadow-xl text-neutral-900 dark:text-neutral-100 max-h-[90vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between mb-3 sm:mb-4">
-              <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
-                Adicionar Projeto
-              </h2>
-              <button
-                aria-label="Fechar"
-                className="p-1 cursor-pointer rounded hover:bg-neutral-100 dark:hover:bg-neutral-800"
-                onClick={() => !saving && setIsAddOpen(false)}
-              >
-                <X size={18} />
-              </button>
-            </div>
+      {/* Modals */}
+      <ProjetoModal
+        isOpen={isAddOpen}
+        onClose={() => setIsAddOpen(false)}
+        reload={reload}
+        allClients={allClients}
+        allUsers={allUsers}
+      />
+      <ClienteModal
+        isOpen={isClienteAddOpen}
+        onClose={() => setIsClienteAddOpen(false)}
+        reload={reloadClients}
+        allCategories={allCategories}
+        setAllCategories={setAllCategories}
+      />
 
-            <form className="space-y-4" onSubmit={handleCreateProject}>
-              {error && (
-                <div className="text-sm text-red-600 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded p-2">
-                  {error}
-                </div>
-              )}
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="sm:col-span-2">
-                  <label className="block text-sm font-medium text-neutral-800 dark:text-neutral-200 mb-1">
-                    Título <span className="text-fuchsia-700">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={nome}
-                    onChange={(e) => setNome(e.target.value)}
-                    placeholder="Ex.: Edição de vídeo institucional"
-                    className="w-full rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-2 text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-fuchsia-600"
-                  />
-                </div>
-
-                <div className="sm:col-span-2">
-                  <label className="block text-sm font-medium text-neutral-800 dark:text-neutral-200 mb-1">
-                    Descrição
-                  </label>
-                  <textarea
-                    value={descricao}
-                    onChange={(e) => setDescricao(e.target.value)}
-                    placeholder="Contexto, escopo e observações do projeto"
-                    className="w-full min-h-24 rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-2 text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-fuchsia-600"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-neutral-800 dark:text-neutral-200 mb-1">
-                    Cliente <span className="text-fuchsia-700">*</span>
-                  </label>
-                  <select
-                    value={clienteId}
-                    onChange={(e) => setClienteId(e.target.value)}
-                    className="w-full rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-2 text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-fuchsia-600"
-                    required
-                  >
-                    <option value="">Selecionar...</option>
-                    {allClients.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.nome}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-neutral-800 dark:text-neutral-200 mb-1">
-                    Criticidade
-                  </label>
-                  <select
-                    value={criticidade}
-                    onChange={(e) =>
-                      setCriticidade(e.target.value as tProjetoCriticidade)
-                    }
-                    className="w-full rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-2 text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-fuchsia-600"
-                  >
-                    <option value={ProjetoCriticidade.Baixa}>Baixa</option>
-                    <option value={ProjetoCriticidade.Media}>Média</option>
-                    <option value={ProjetoCriticidade.Alta}>Alta</option>
-                    <option value={ProjetoCriticidade.Urgente}>Urgente</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-neutral-800 dark:text-neutral-200 mb-1">
-                    Início <span className="text-fuchsia-700">*</span>
-                  </label>
-                  <input
-                    type="date"
-                    value={dataInicio}
-                    onChange={(e) => setDataInicio(e.target.value)}
-                    className="w-full rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-2 text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-fuchsia-600"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-neutral-800 dark:text-neutral-200 mb-1">
-                    Fim previsto <span className="text-fuchsia-700">*</span>
-                  </label>
-                  <input
-                    type="date"
-                    value={dataFimPrevisto}
-                    onChange={(e) => setDataFimPrevisto(e.target.value)}
-                    className="w-full rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-2 text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-fuchsia-600"
-                    required
-                  />
-                </div>
-              </div>
-
-              {/* Equipe */}
-              <div className="border border-neutral-200 dark:border-neutral-800 rounded-lg p-3">
-                <div className="text-sm font-medium text-neutral-700 dark:text-neutral-200 mb-2">
-                  Equipe
-                </div>
-                {allUsers.length > 0 && (
-                  <div className="mb-2">
-                    <SearchInput
-                      placeholder="Buscar membros da equipe"
-                      value={teamSearch}
-                      onChange={setTeamSearch}
-                      size="sm"
-                    />
-                  </div>
-                )}
-                {allUsers.length === 0 ? (
-                  <div className="text-sm text-neutral-500">
-                    Nenhum usuário.
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-auto pr-1">
-                    {filteredUsers.map((u) => {
-                      const checked = selectedEquipe.has(u.id);
-                      return (
-                        <label
-                          key={u.id}
-                          className="flex items-center gap-2 text-sm cursor-pointer select-none"
-                        >
-                          <input
-                            type="checkbox"
-                            checked={checked}
-                            onChange={() => toggleEquipe(u.id)}
-                            className="h-4 w-4 rounded border-neutral-300 dark:border-neutral-700 text-fuchsia-700 focus:ring-fuchsia-600"
-                          />
-                          <span className="inline-flex items-center gap-2">
-                            <Avatar name={u.nome} size="sm" />
-
-                            <span className="truncate">{u.nome}</span>
-                          </span>
-                        </label>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-
-              <div className="flex justify-end">
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="cursor-pointer inline-flex items-center gap-2 bg-fuchsia-900 hover:bg-purple-400 active:bg-fuchsia-950 text-white rounded-md px-4 py-2 disabled:opacity-50"
-                >
-                  {saving ? "Salvando..." : "Cadastrar"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Lista */}
+      {/* Lista por cliente */}
       <section className="mt-6">
-        {projects.length === 0 ? (
+        {groups.length === 0 ? (
           <div className="text-center text-neutral-600 dark:text-neutral-400 py-16">
             Nenhum projeto encontrado.
           </div>
         ) : (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {pageItems.map((p, idx) => {
-                const name = p.nome;
-                const cliente = clientNames[p.cliente] || "—";
-                const responsavel = userNames[p.responsavel] || "—";
-                const pct = etapaProgressPct(p.etapa);
-
+              {pageItems.map((g, idx) => {
                 return (
                   <Card key={idx}>
                     {/* Header */}
                     <div className="flex items-center gap-3 mb-4">
                       <div className="w-12 h-12 rounded-full flex items-center justify-center font-extrabold text-[18px] text-white ">
-                        {<Avatar name={cliente} />}
+                        <Avatar name={g.clientName} />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="font-extrabold mb-1 truncate">
-                          {name}
+                        <div className="font-extrabold truncate">
+                          {g.clientName}
                         </div>
-                        <div className="text-[13px] text-neutral-500 truncate">
-                          Cliente: {cliente}
+                        <div className="flex items-center gap-2 text-md font-bold text-neutral-500 truncate  ">
+                          <Folder size={22} />
+                          {g.total} projetos Ativo{g.total === 1 ? "" : "s"}
                         </div>
                       </div>
                     </div>
 
-                    {/* Meta */}
-                    <div className="flex flex-wrap items-center gap-2 mb-3 text-sm">
-                      <ProjectEtapaBadge etapa={p.etapa} />
-                      <ProjectCriticidadeBadge criticidade={p.criticidade} />
-                      {typeof p.isAtrasado === "boolean" && (
-                        <ProjectPrazoBadge isAtrasado={p.isAtrasado} />
-                      )}
+                    {/* Doughnut + legenda */}
+                    <div className=" mb-4 py-8">
+                      <div className="relative h-40">
+                        <Doughnut
+                          options={chartOptions}
+                          data={{
+                            labels: ORDER.filter(
+                              (et) => (g.byEtapa[et] ?? 0) > 0
+                            ).map((et) => etapaLabel(et)),
+                            datasets: [
+                              {
+                                data: ORDER.filter(
+                                  (et) => (g.byEtapa[et] ?? 0) > 0
+                                ).map((et) => g.byEtapa[et] ?? 0),
+                                backgroundColor: ORDER.filter(
+                                  (et) => (g.byEtapa[et] ?? 0) > 0
+                                ).map((et) => ETAPA_COLORS[et]),
+                                borderWidth: 0,
+                              },
+                            ],
+                          }}
+                        />
+                      </div>
+
+                      {/* Legenda com totais */}
+                      <div className="mt-3 grid grid-cols-1 gap-1 text-sm">
+                        {ORDER.map((et) => {
+                          const val = g.byEtapa[et] ?? 0;
+                          if (!val) return null;
+                          return (
+                            <div key={et} className="flex items-center gap-2">
+                              <span
+                                className="inline-block w-3 h-3 rounded-sm"
+                                style={{ backgroundColor: ETAPA_COLORS[et] }}
+                              />
+                              <span className="text-neutral-600 dark:text-neutral-300">
+                                {etapaLabel(et)}:{" "}
+                                <span className="font-semibold text-neutral-800 dark:text-neutral-100">
+                                  {val}
+                                </span>
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
 
-                    {/* Progress */}
-                    <div className="mb-3">
-                      <ProgressBar value={pct} size="sm" />
-                      <div className="text-[12px] text-neutral-500 mt-1">
-                        Progresso: {pct}%
-                      </div>
-                    </div>
-
-                    {/* Info */}
-                    <div className="text-sm text-neutral-600 dark:text-neutral-300 space-y-1 mb-3">
-                      <div>
-                        <span className="text-neutral-500">Responsável:</span>{" "}
-                        {responsavel}
-                      </div>
-                      <div>
-                        <span className="text-neutral-500">Início:</span>{" "}
-                        {new Date(p.dataInicio).toLocaleDateString("pt-BR")}
-                      </div>
-                      <div>
-                        <span className="text-neutral-500">Previsto:</span>{" "}
-                        {new Date(p.dataFimPrevisto).toLocaleDateString(
-                          "pt-BR"
-                        )}
-                      </div>
-                      {p.descricao && (
-                        <div className="text-neutral-500 truncate">
-                          {p.descricao}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Equipe avatars */}
-                    {Array.isArray(p.equipe) && p.equipe.length > 0 && (
-                      <div className="flex items-center -space-x-2 mb-4">
-                        {p.equipe.slice(0, 5).map((m, i) => (
-                          <div
-                            key={m.idUsuario + i}
-                            className="w-7 h-7 rounded-full ring-2 ring-white dark:ring-neutral-900 overflow-hidden bg-neutral-200 flex items-center justify-center"
-                            title={userNames[m.idUsuario] || "Usuário"}
-                          >
-                            <Avatar
-                              name={userNames[m.idUsuario] || "Usuário"}
-                            />
-                          </div>
-                        ))}
-                        {p.equipe.length > 5 && (
-                          <div className="w-7 h-7 rounded-full ring-2 ring-white dark:ring-neutral-900 bg-neutral-300 text-[11px] flex items-center justify-center">
-                            +{p.equipe.length - 5}
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {/* Actions (placeholder, desabilitadas) */}
+                    {/* Ações */}
                     <div className="flex gap-2">
-                      <Link
-                        href={`/projetos/${p.id}`}
-                        className="px-3 py-2 rounded-full font-bold text-[13px] bg-fuchsia-900 text-neutral-100 transition-colors duration-200 hover:bg-fuchsia-400 active:bg-fuchsia-950 cursor-pointer"
+                      <button
+                        className="px-3 flex gap-2 items-center py-2 rounded-md font-bold text-sm bg-fuchsia-900 text-neutral-100 transition-colors duration-200 hover:bg-fuchsia-400 active:bg-fuchsia-950 cursor-pointer"
+                        onClick={() => {
+                          setManageClientId(g.clientId);
+                          setIsManageOpen(true);
+                        }}
                       >
-                        Detalhes
+                        <Eye size={22} /> Ver Detalhes
+                      </button>
+                      <Link
+                        href={`/clientes/${g.clientId}`}
+                        className="px-3 flex gap-2 items-center py-2 rounded-md font-bold text-sm shadow dark:hover:bg-neutral-800 hover:bg-neutral-300  text-neutral-100 transition-colors duration-200 cursor-pointer"
+                      >
+                        <Pencil size={22} />
+                        Editar
                       </Link>
                     </div>
                   </Card>
@@ -596,6 +584,14 @@ export default function Projetos() {
           </>
         )}
       </section>
+
+      {/* modal gerenciamento de projeto (componentizado) */}
+      <ProjetoGerenciamentoModal
+        isOpen={isManageOpen}
+        onClose={() => setIsManageOpen(false)}
+        clientId={manageClientId}
+        clientName={manageClientId ? clientNames[manageClientId] : undefined}
+      />
     </>
   );
 }
