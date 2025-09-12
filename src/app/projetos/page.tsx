@@ -523,7 +523,7 @@ export default function Projetos() {
                       </button>
                       <Link
                         href={`/clientes/${g.clientId}`}
-                        className="px-3 flex gap-2 items-center py-2 rounded-md font-bold text-sm shadow dark:hover:bg-neutral-800 hover:bg-neutral-300  text-neutral-100 transition-colors duration-200 cursor-pointer"
+                        className="px-3 flex gap-2 items-center py-2 rounded-md font-bold text-sm shadow dark:hover:bg-neutral-800 hover:bg-neutral-300  dark:text-neutral-100  text-neutral-900 transition-colors duration-200 cursor-pointer"
                       >
                         <Pencil size={22} />
                         Editar

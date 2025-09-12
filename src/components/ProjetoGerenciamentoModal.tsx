@@ -243,8 +243,11 @@ export default function ProjetoGerenciamentoModal({
               <Link
                 key={p.id}
                 href={`/projetos/${p.id}`}
-                className="block rounded-lg  shadow p-3 dark:hover:bg-neutral-800/50 transition-colors"
+                className="block rounded-lg hover:scale-103 transition transform duration-300 shadow p-3 dark:hover:bg-neutral-800/50 "
               >
+                <div className="text-neutral-400  text-sm mb-2 ">
+                  Previsão: {p.dataFimPrevisto.toLocaleDateString()}
+                </div>
                 <div className="font-semibold mb-2 truncate">{p.nome}</div>
                 <div className="flex items-center gap-2 flex-wrap">
                   <ProjectEtapaBadge etapa={p.etapa} />
