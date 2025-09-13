@@ -28,6 +28,7 @@ import {
   ChartOptions,
 } from "chart.js";
 import { ETAPA_COLORS, ETAPA_ORDER as ORDER } from "@/constants/etapaColors";
+import ProjectEtapaBadge from "@/components/ProjectEtapaBadge";
 
 type AtrasoFilter = "all" | "late" | "on_time";
 
@@ -48,6 +49,7 @@ export default function Projetos() {
   const [etapaFilter, setEtapaFilter] = useState<"all" | tProjetoEtapa>("all");
   const [atrasoFilter, setAtrasoFilter] = useState<AtrasoFilter>("all");
   const [page, setPage] = useState(1);
+  const [listView, setListView] = useState(false);
   const pageSize = 8;
 
   // Lookup maps for client and user names
@@ -332,10 +334,20 @@ export default function Projetos() {
     <>
       <div className="flex justify-between gap-3 mb-4">
         <div className="flex justify-end gap-3 mb-4">
-          <button className="shadow rounded-sm p-2 hover:bg-neutral-800 transition-colors cursor-pointer">
+          <button
+            className={`shadow rounded-sm p-2 hover:bg-neutral-800 transition-colors cursor-pointer ${
+              !listView ? "dark:bg-neutral-800 bg-neutral-100" : ""
+            }`}
+            onClick={() => setListView(false)}
+          >
             <IdCard />
           </button>
-          <button className="shadow rounded-sm p-2 hover:bg-neutral-800 transition-colors cursor-pointer">
+          <button
+            className={`shadow rounded-sm p-2 hover:bg-neutral-800 transition-colors cursor-pointer ${
+              listView ? "dark:bg-neutral-800 bg-neutral-100" : ""
+            }`}
+            onClick={() => setListView(true)}
+          >
             <List />
           </button>
         </div>
@@ -416,22 +428,6 @@ export default function Projetos() {
         </div>
       </section>
 
-      {/* Modals */}
-      <ProjetoModal
-        isOpen={isAddOpen}
-        onClose={() => setIsAddOpen(false)}
-        reload={reload}
-        allClients={allClients}
-        allUsers={allUsers}
-      />
-      <ClienteModal
-        isOpen={isClienteAddOpen}
-        onClose={() => setIsClienteAddOpen(false)}
-        reload={reloadClients}
-        allCategories={allCategories}
-        setAllCategories={setAllCategories}
-      />
-
       {/* Lista por cliente */}
       <section className="mt-6">
         {groups.length === 0 ? (
@@ -440,99 +436,187 @@ export default function Projetos() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {pageItems.map((g, idx) => {
-                return (
-                  <Card
-                    key={idx}
-                    className="h-[506px] flex flex-col justify-between"
-                  >
-                    {/* Header */}
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="rounded-full flex items-center justify-center font-extrabold text-[18px] text-white ">
-                        <Avatar name={g.clientName} size="lg" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="font-extrabold truncate">
-                          {g.clientName}
-                        </div>
-                        <div className="flex items-center gap-2 text-md font-bold text-neutral-500 truncate  ">
-                          <Folder size={22} />
-                          {g.total} projetos Ativo{g.total === 1 ? "" : "s"}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Doughnut + legenda */}
-                    <div className=" mb-4 py-8">
-                      <div className="relative h-40">
-                        <Doughnut
-                          options={chartOptions}
-                          data={{
-                            labels: ORDER.filter(
-                              (et) => (g.byEtapa[et] ?? 0) > 0
-                            ).map((et) => etapaLabel(et)),
-                            datasets: [
-                              {
-                                data: ORDER.filter(
-                                  (et) => (g.byEtapa[et] ?? 0) > 0
-                                ).map((et) => g.byEtapa[et] ?? 0),
-                                backgroundColor: ORDER.filter(
-                                  (et) => (g.byEtapa[et] ?? 0) > 0
-                                ).map((et) => ETAPA_COLORS[et]),
-                                borderWidth: 0,
-                              },
-                            ],
+            {/* Visão Tabela (semântica) */}
+            {listView && (
+              <section id="visaoTabela" className="mt-2">
+                <div className="overflow-x-auto rounded-md shadow-sm ">
+                  <table className="min-w-full table-auto border-collapse">
+                    <thead className="bg-neutral-200 dark:bg-neutral-950 ">
+                      <tr className="">
+                        <th className="px-3 py-3 text-left text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+                          Cliente
+                        </th>
+                        <th className="px-3 py-3 text-center text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+                          <div className="inline-flex items-center gap-2">
+                            <Folder size={18} />
+                            Projetos
+                          </div>
+                        </th>
+                        <th className="px-3 py-3 text-center text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+                          <ProjectEtapaBadge
+                            etapa={ProjetoEtapa.AguardandoArquivos}
+                          />
+                        </th>
+                        <th className="px-3 py-3 text-center text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+                          <ProjectEtapaBadge etapa={ProjetoEtapa.Decupagem} />
+                        </th>
+                        <th className="px-3 py-3 text-center text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+                          <ProjectEtapaBadge etapa={ProjetoEtapa.Revisao} />
+                        </th>
+                        <th className="px-3 py-3 text-center text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+                          <ProjectEtapaBadge etapa={ProjetoEtapa.Sonorizacao} />
+                        </th>
+                        <th className="px-3 py-3 text-center text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+                          <ProjectEtapaBadge etapa={ProjetoEtapa.PosProducao} />
+                        </th>
+                        <th className="px-3 py-3 text-center text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+                          <ProjectEtapaBadge etapa={ProjetoEtapa.Analise} />
+                        </th>
+                        <th className="px-3 py-3 text-center text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+                          <ProjectEtapaBadge etapa={ProjetoEtapa.Concluido} />
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-neutral-300 dark:divide-neutral-700">
+                      {pageItems.map((g, idx) => (
+                        <tr
+                          key={idx}
+                          className="bg-white dark:bg-neutral-900 hover:bg-neutral-100 hover:dark:bg-neutral-800 cursor-pointer hover:scale-102 transition duration-300"
+                          onClick={() => {
+                            setManageClientId(g.clientId);
+                            setIsManageOpen(true);
                           }}
-                        />
-                      </div>
-
-                      {/* Legenda com totais */}
-                      <div className="mt-5 grid grid-cols-2 gap-1  text-sm">
-                        {ORDER.map((et) => {
-                          const val = g.byEtapa[et] ?? 0;
-                          if (!val) return null;
-                          return (
-                            <div key={et} className="flex items-center gap-2 ">
-                              <span
-                                className="inline-block w-3 h-3 rounded-sm"
-                                style={{ backgroundColor: ETAPA_COLORS[et] }}
-                              />
-                              <span className="text-neutral-600 dark:text-neutral-300">
-                                {etapaLabel(et)}:{" "}
-                                <span className="font-semibold text-neutral-800 dark:text-neutral-100">
-                                  {val}
-                                </span>
-                              </span>
+                        >
+                          <td className="px-3 py-3 text-sm text-neutral-800 dark:text-neutral-100">
+                            <div className="flex items-center gap-2">
+                              <Avatar name={g.clientName} />
+                              <span>{g.clientName}</span>
                             </div>
-                          );
-                        })}
-                      </div>
-                    </div>
+                          </td>
+                          <td className="px-3 py-3 text-center text-sm font-medium text-neutral-900 dark:text-neutral-100">
+                            {g.total}
+                          </td>
+                          <td className="px-3 py-3 text-center text-sm text-neutral-800 dark:text-neutral-100">
+                            {g.byEtapa[ProjetoEtapa.AguardandoArquivos] ?? 0}
+                          </td>
+                          <td className="px-3 py-3 text-center text-sm text-neutral-800 dark:text-neutral-100">
+                            {g.byEtapa[ProjetoEtapa.Decupagem] ?? 0}
+                          </td>
+                          <td className="px-3 py-3 text-center text-sm text-neutral-800 dark:text-neutral-100">
+                            {g.byEtapa[ProjetoEtapa.Revisao] ?? 0}
+                          </td>
+                          <td className="px-3 py-3 text-center text-sm text-neutral-800 dark:text-neutral-100">
+                            {g.byEtapa[ProjetoEtapa.Sonorizacao] ?? 0}
+                          </td>
+                          <td className="px-3 py-3 text-center text-sm text-neutral-800 dark:text-neutral-100">
+                            {g.byEtapa[ProjetoEtapa.PosProducao] ?? 0}
+                          </td>
+                          <td className="px-3 py-3 text-center text-sm text-neutral-800 dark:text-neutral-100">
+                            {g.byEtapa[ProjetoEtapa.Analise] ?? 0}
+                          </td>
+                          <td className="px-3 py-3 text-center text-sm text-neutral-800 dark:text-neutral-100">
+                            {g.byEtapa[ProjetoEtapa.Concluido] ?? 0}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+            )}
 
-                    {/* Ações */}
-                    <div className="flex gap-2">
-                      <button
-                        className="px-3 flex gap-2 items-center py-2 rounded-md font-bold text-sm bg-fuchsia-900 text-neutral-100 transition-colors duration-200 hover:bg-fuchsia-400 active:bg-fuchsia-950 cursor-pointer"
-                        onClick={() => {
-                          setManageClientId(g.clientId);
-                          setIsManageOpen(true);
-                        }}
-                      >
-                        <Eye size={22} /> Ver Detalhes
-                      </button>
-                      <Link
-                        href={`/clientes/${g.clientId}`}
-                        className="px-3 flex gap-2 items-center py-2 rounded-md font-bold text-sm shadow dark:hover:bg-neutral-800 hover:bg-neutral-300  dark:text-neutral-100  text-neutral-900 transition-colors duration-200 cursor-pointer"
-                      >
-                        <Pencil size={22} />
-                        Editar
-                      </Link>
-                    </div>
-                  </Card>
-                );
-              })}
-            </div>
+            {/* Visão card */}
+            {!listView && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {pageItems.map((g, idx) => {
+                  return (
+                    <Card
+                      key={idx}
+                      className="h-[506px] flex flex-col justify-between"
+                    >
+                      {/* Header */}
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="rounded-full flex items-center justify-center font-extrabold text-[18px] text-white ">
+                          <Avatar name={g.clientName} size="lg" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-extrabold truncate">
+                            {g.clientName}
+                          </div>
+                          <div className="flex items-center gap-2 text-md font-bold text-neutral-500 truncate  ">
+                            <Folder size={22} />
+                            {g.total} projetos Ativo{g.total === 1 ? "" : "s"}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Doughnut + legenda */}
+                      <div className=" mb-4 py-8">
+                        <div className="relative h-40">
+                          <Doughnut
+                            options={chartOptions}
+                            data={{
+                              labels: ORDER.filter(
+                                (et) => (g.byEtapa[et] ?? 0) > 0
+                              ).map((et) => etapaLabel(et)),
+                              datasets: [
+                                {
+                                  data: ORDER.filter(
+                                    (et) => (g.byEtapa[et] ?? 0) > 0
+                                  ).map((et) => g.byEtapa[et] ?? 0),
+                                  backgroundColor: ORDER.filter(
+                                    (et) => (g.byEtapa[et] ?? 0) > 0
+                                  ).map((et) => ETAPA_COLORS[et]),
+                                  borderWidth: 0,
+                                },
+                              ],
+                            }}
+                          />
+                        </div>
+
+                        {/* Legenda com totais */}
+                        <div className="mt-5 grid grid-cols-2 gap-1  text-sm">
+                          {ORDER.map((et) => {
+                            const val = g.byEtapa[et] ?? 0;
+                            if (!val) return null;
+                            return (
+                              <div
+                                key={et}
+                                className="flex items-center gap-2 "
+                              >
+                                <span
+                                  className="inline-block w-3 h-3 rounded-sm"
+                                  style={{ backgroundColor: ETAPA_COLORS[et] }}
+                                />
+                                <span className="text-neutral-600 dark:text-neutral-300">
+                                  {etapaLabel(et)}:{" "}
+                                  <span className="font-semibold text-neutral-800 dark:text-neutral-100">
+                                    {val}
+                                  </span>
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Ações */}
+                      <div className="flex gap-2">
+                        <button
+                          className="px-3 flex gap-2 items-center py-2 rounded-md font-bold text-sm bg-fuchsia-900 text-neutral-100 transition-colors duration-200 hover:bg-fuchsia-400 active:bg-fuchsia-950 cursor-pointer"
+                          onClick={() => {
+                            setManageClientId(g.clientId);
+                            setIsManageOpen(true);
+                          }}
+                        >
+                          <Eye size={22} /> Ver Detalhes
+                        </button>
+                      </div>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
 
             <div className="flex items-center justify-center gap-2 mt-6">
               <button
@@ -557,12 +641,26 @@ export default function Projetos() {
         )}
       </section>
 
-      {/* modal gerenciamento de projeto (componentizado) */}
+      {/* Modals */}
       <ProjetoGerenciamentoModal
         isOpen={isManageOpen}
         onClose={() => setIsManageOpen(false)}
         clientId={manageClientId}
         clientName={manageClientId ? clientNames[manageClientId] : undefined}
+      />
+      <ProjetoModal
+        isOpen={isAddOpen}
+        onClose={() => setIsAddOpen(false)}
+        reload={reload}
+        allClients={allClients}
+        allUsers={allUsers}
+      />
+      <ClienteModal
+        isOpen={isClienteAddOpen}
+        onClose={() => setIsClienteAddOpen(false)}
+        reload={reloadClients}
+        allCategories={allCategories}
+        setAllCategories={setAllCategories}
       />
     </>
   );

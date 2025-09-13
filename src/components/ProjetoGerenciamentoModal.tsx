@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { X, Folder } from "lucide-react";
+import { X, Folder, Pencil } from "lucide-react";
 import SearchInput from "@/components/SearchInput";
 import Avatar from "@/components/Avatar";
 import Link from "next/link";
@@ -135,6 +135,13 @@ export default function ProjetoGerenciamentoModal({
                 <Folder size={22} />
                 {clientProjects.length} projetos
               </div>
+              <Link
+                href={`/clientes/${clientId}`}
+                className="px-3 mt-3 flex gap-2 w-25 items-center py-2 rounded-md font-bold text-sm shadow dark:hover:bg-neutral-800 hover:bg-neutral-300  dark:text-neutral-100  text-neutral-900 transition-colors duration-200 cursor-pointer"
+              >
+                <Pencil size={22} />
+                Editar
+              </Link>
             </div>
           </div>
           <button
