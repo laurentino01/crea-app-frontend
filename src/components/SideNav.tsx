@@ -14,7 +14,6 @@ type Tlinks = {
 export default function SideNav() {
   const links: Tlinks[] = [
     { href: "/dashboard", icon: <Gauge />, title: "Dashboard" },
-    { href: "/clientes", icon: <Handshake />, title: "Clientes" },
     { href: "/projetos", icon: <Folder />, title: "Projetos" },
     { href: "/equipe", icon: <Users />, title: "Equipe" },
     { href: "/ranking", icon: <Trophy />, title: "Ranking" },

@@ -9,6 +9,7 @@ import ClientProjectsEtapasDoughnut from "@/components/ClientProjectsEtapasDough
 import Avatar from "@/components/Avatar";
 import type { tClientPersisted } from "@/@types/tClient";
 import { clientService } from "@/services/LocalStorageClientService";
+import { redirect, RedirectType } from "next/navigation";
 
 type StatusFilter = "all" | "active" | "inactive";
 
@@ -29,10 +30,16 @@ export default function Clientes() {
   const [endereco, setEndereco] = useState("");
   const [descricao, setDescricao] = useState("");
   const [ativo, setAtivo] = useState(true);
-  const [selectedCategoria, setSelectedCategoria] = useState<string>("__none__");
+  const [selectedCategoria, setSelectedCategoria] =
+    useState<string>("__none__");
   const [newCategoria, setNewCategoria] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Redireciona para projetos
+  useEffect(() => {
+    redirect("projetos", RedirectType.replace);
+  });
 
   // Load distinct categories (from entire dataset) once
   useEffect(() => {
@@ -52,7 +59,11 @@ export default function Clientes() {
 
   async function reload() {
     const ativo =
-      statusFilter === "all" ? undefined : statusFilter === "active" ? true : false;
+      statusFilter === "all"
+        ? undefined
+        : statusFilter === "active"
+        ? true
+        : false;
     const categoria = categoriaFilter === "all" ? undefined : categoriaFilter;
     const result = await clientService.findAll({ search, categoria, ativo });
     setClients(result);
@@ -380,7 +391,9 @@ export default function Clientes() {
                         {<Avatar name={name} />}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="font-extrabold mb-1 truncate">{name}</div>
+                        <div className="font-extrabold mb-1 truncate">
+                          {name}
+                        </div>
 
                         {c.ativo && (
                           <div className="text-sm flex items-center justify-center gap-1 w-[fit-content] bg-violet-200 rounded-full px-2 text-violet-900 ">
@@ -414,7 +427,10 @@ export default function Clientes() {
                     </div>
 
                     {/* Projects Doughnut */}
-                    <ClientProjectsEtapasDoughnut clientId={c.id} className="mb-4" />
+                    <ClientProjectsEtapasDoughnut
+                      clientId={c.id}
+                      className="mb-4"
+                    />
 
                     {/* Actions */}
                     <div className="flex gap-2">

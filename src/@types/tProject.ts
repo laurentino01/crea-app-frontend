@@ -91,4 +91,7 @@ export type tProjectListQuery = {
   isAtrasado?: boolean;
   cliente?: string; // id do cliente
   responsavel?: tIdUsuario;
+  // Filtros adicionais
+  categoriaCliente?: string; // categoria do cliente (igualdade exata, case-insensitive)
+  dataFimPrevistoAte?: Date; // filtra projetos com data fim prevista até esta data (inclusive)
 };

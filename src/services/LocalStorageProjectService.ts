@@ -11,6 +11,7 @@ import {
   tProjetoEtapaItem,
 } from "../@types/tProject";
 import { IProjectServices } from "../interfaces/IProjectServices";
+import { clientService } from "./LocalStorageClientService";
 
 const STORAGE_KEY = "projects";
 
@@ -119,7 +120,15 @@ export class LocalStorageProjectService implements IProjectServices {
     const all = getStoredProjects();
     if (!query) return all;
 
-    const { search, etapa, isAtrasado, cliente, responsavel } = query;
+    const {
+      search,
+      etapa,
+      isAtrasado,
+      cliente,
+      responsavel,
+      categoriaCliente,
+      dataFimPrevistoAte,
+    } = query;
     let filtered = all;
 
     if (typeof isAtrasado === "boolean") {
@@ -138,17 +147,41 @@ export class LocalStorageProjectService implements IProjectServices {
       filtered = filtered.filter((p) => p.responsavel === responsavel);
     }
 
+    if (dataFimPrevistoAte) {
+      const cutoff = new Date(dataFimPrevistoAte);
+      cutoff.setHours(23, 59, 59, 999);
+      const cutoffMs = cutoff.getTime();
+      filtered = filtered.filter(
+        (p) => p.dataFimPrevisto && p.dataFimPrevisto.getTime() <= cutoffMs
+      );
+    }
+
+    // Precarrega clientes apenas se necessário (categoria ou pesquisa por nome de cliente)
+    let clientsCache: Awaited<ReturnType<typeof clientService.findAll>> | null = null;
+    const ensureClients = async () => {
+      if (!clientsCache) clientsCache = await clientService.findAll();
+      return clientsCache;
+    };
+
+    if (categoriaCliente && categoriaCliente.trim()) {
+      const cat = categoriaCliente.trim().toLowerCase();
+      const clients = await ensureClients();
+      const catMap = new Map(
+        clients.map((c) => [c.id, (c.categoria ?? "").trim().toLowerCase()])
+      );
+      filtered = filtered.filter((p) => catMap.get(p.cliente) === cat);
+    }
+
     if (search && search.trim()) {
       const term = search.trim().toLowerCase();
+      const clients = await ensureClients();
+      const nameMap = new Map(
+        clients.map((c) => [c.id, (c.nome ?? "").toLowerCase()])
+      );
+      // Busca apenas por clientes (nome)
       filtered = filtered.filter((p) => {
-        const nome = p.nome?.toLowerCase?.() ?? "";
-        const desc = p.descricao?.toLowerCase?.() ?? "";
-        const clienteStr = p.cliente?.toLowerCase?.() ?? "";
-        return (
-          nome.includes(term) ||
-          desc.includes(term) ||
-          clienteStr.includes(term)
-        );
+        const clienteNome = nameMap.get(p.cliente) ?? "";
+        return clienteNome.includes(term);
       });
     }
 

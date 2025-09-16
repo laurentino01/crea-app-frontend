@@ -49,6 +49,10 @@ export default function Header() {
       title: "Development",
       explain: "Visão de desenvolvimento",
     },
+    login: {
+      title: "Login",
+      explain: "Visão de desenvolvimento",
+    },
   };
 
   useEffect(() => {

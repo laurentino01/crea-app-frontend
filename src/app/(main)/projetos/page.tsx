@@ -45,9 +45,10 @@ const etapaOptions: { value: tProjetoEtapa; label: string }[] = [
 
 export default function Projetos() {
   const [projects, setProjects] = useState<tProjectPersisted[]>([]);
+  // Filtros solicitados: categoria de cliente e data fim prevista (até)
   const [search, setSearch] = useState("");
-  const [etapaFilter, setEtapaFilter] = useState<"all" | tProjetoEtapa>("all");
-  const [atrasoFilter, setAtrasoFilter] = useState<AtrasoFilter>("all");
+  const [categoriaFilter, setCategoriaFilter] = useState<string>("all");
+  const [dataFimAte, setDataFimAte] = useState<string>(""); // yyyy-mm-dd
   const [page, setPage] = useState(1);
   const [listView, setListView] = useState(false);
   const pageSize = 8;
@@ -134,15 +135,15 @@ export default function Projetos() {
   }
 
   async function reload() {
-    const etapa = etapaFilter === "all" ? undefined : etapaFilter;
-    const isAtrasado =
-      atrasoFilter === "all"
-        ? undefined
-        : atrasoFilter === "late"
-        ? true
-        : false;
+    const categoriaCliente =
+      categoriaFilter === "all" ? undefined : categoriaFilter;
+    const dataFimPrevistoAte = dataFimAte ? new Date(dataFimAte) : undefined;
 
-    const list = await projectService.findAll({ search, etapa, isAtrasado });
+    const list = await projectService.findAll({
+      search,
+      categoriaCliente,
+      dataFimPrevistoAte,
+    });
     setProjects(list);
   }
 
@@ -150,7 +151,7 @@ export default function Projetos() {
     reload();
     setPage(1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search, etapaFilter, atrasoFilter]);
+  }, [search, categoriaFilter, dataFimAte]);
 
   // ---- Agrupar por cliente ----
   type tClientGroup = {
@@ -382,30 +383,25 @@ export default function Projetos() {
       <section className="w-full bg-neutral-50 dark:bg-neutral-900 py-5 px-2 rounded-lg flex flex-col gap-4 md:flex-row md:items-center md:justify-between ">
         <div className="w-full md:max-w-3xl flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
           <SearchInput
-            placeholder="Buscar por nome, cliente ou descrição"
+            placeholder="Buscar por cliente"
             value={search}
             onChange={setSearch}
             size="md"
             className="flex-1"
           />
-
           <div className="flex items-center gap-2">
             <label className="text-sm text-neutral-700 dark:text-neutral-300">
-              Etapa
+              Categoria
             </label>
             <select
-              value={etapaFilter}
-              onChange={(e) =>
-                setEtapaFilter(
-                  (e.target.value as "all" | tProjetoEtapa) ?? "all"
-                )
-              }
+              value={categoriaFilter}
+              onChange={(e) => setCategoriaFilter(e.target.value)}
               className="cursor-pointer rounded-md border bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-700 text-neutral-800 dark:text-neutral-200 px-3 py-2 text-sm"
             >
               <option value="all">Todas</option>
-              {etapaOptions.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
+              {allCategories.map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat}
                 </option>
               ))}
             </select>
@@ -413,17 +409,14 @@ export default function Projetos() {
 
           <div className="flex items-center gap-2">
             <label className="text-sm text-neutral-700 dark:text-neutral-300">
-              Prazo
+              Previsão
             </label>
-            <select
-              value={atrasoFilter}
-              onChange={(e) => setAtrasoFilter(e.target.value as AtrasoFilter)}
-              className="cursor-pointer rounded-md border bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-700 text-neutral-800 dark:text-neutral-200 px-3 py-2 text-sm"
-            >
-              <option value="all">Todos</option>
-              <option value="late">Atrasados</option>
-              <option value="on_time">Em dia</option>
-            </select>
+            <input
+              type="date"
+              value={dataFimAte}
+              onChange={(e) => setDataFimAte(e.target.value)}
+              className="rounded-md border bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-700 text-neutral-800 dark:text-neutral-200 px-3 py-2 text-sm"
+            />
           </div>
         </div>
       </section>
