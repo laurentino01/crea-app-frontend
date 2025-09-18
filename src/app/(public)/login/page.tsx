@@ -4,11 +4,9 @@ import { useState } from "react";
 import { Circle, Eye, EyeOff, User } from "lucide-react";
 import Image from "next/image";
 import { SubmitHandler, useForm } from "react-hook-form";
-
-interface IFormInput {
-  email: string;
-  password: string;
-}
+import { loginUser } from "@/usecases/loginUser";
+import { authService } from "@/services/api/AuthService";
+import { tUserAuth } from "@/@types/tUser";
 
 export default function Login() {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -16,8 +14,12 @@ export default function Login() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<IFormInput>();
-  const onSubmit: SubmitHandler<IFormInput> = (data) => console.log(data);
+  } = useForm<tUserAuth>();
+  const onSubmit: SubmitHandler<tUserAuth> = async (data) => {
+    const res = await loginUser(authService, data);
+
+    console.log(res);
+  };
 
   const togglePasswordVisibility = () => {
     setIsPasswordVisible((prevState) => !prevState);
