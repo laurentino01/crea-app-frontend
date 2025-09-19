@@ -1,5 +1,6 @@
-import { tUserAuth } from "@/@types/tUser";
+import { tUserAuth, tUserPersisted, tUserSession } from "@/@types/tUser";
 import IAuthServices from "@/interfaces/IAuthServices";
+import { jwtDecode } from "jwt-decode";
 
 class AuthService implements IAuthServices {
   private readonly url: string =
@@ -15,20 +16,45 @@ class AuthService implements IAuthServices {
     return data;
   }
 
-  storageToken() {}
+  storageToken(token: string) {
+    if (window === undefined) {
+      return;
+    }
+    localStorage.setItem("token", token);
+  }
 
   getToken() {}
 
-  logout() {}
+  logout() {
+    if (window === undefined) {
+      return;
+    }
+    localStorage.removeItem("token");
+  }
 
   getUserId() {}
 
   getUserRole() {}
 
-  getUserData() {}
+  getUserData() {
+    if (window === undefined) {
+      return;
+    }
+
+    const token = localStorage.getItem("token");
+    if (token) {
+      return jwtDecode<tUserSession>(token);
+    }
+  }
 
   /** Valida se está logado */
-  isLogged() {}
+  isLogged() {
+    if (window === undefined) {
+      return false;
+    }
+
+    return !!localStorage.getItem("token");
+  }
 
   // Valida se é adm
   isAdm() {}

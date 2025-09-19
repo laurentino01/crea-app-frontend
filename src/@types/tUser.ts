@@ -1,3 +1,8 @@
+export enum UserRole {
+  ADM = "ADM",
+  EDITOR = "EDITOR",
+}
+
 export type tUserCreateDto = {
   nomeCompleto: string;
   apelido: string;
@@ -22,4 +27,14 @@ export type tUserListQuery = {
 export type tUserAuth = {
   email: string;
   password: string;
+};
+
+export type tUserSession = {
+  email: string;
+  exp: Date;
+  iat: Date;
+  id: number;
+  nomeCompleto: string;
+  primeiroLogin: boolean;
+  role: UserRole;
 };

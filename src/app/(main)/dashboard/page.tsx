@@ -23,7 +23,8 @@ import {
   Folder,
   TriangleAlert,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
+import { SessionContext } from "@/providers/SessionProvider";
 
 type StatusFilter = "all" | "late" | "on_time";
 type ProgressoFilter = "all" | "p0_25" | "p26_50" | "p51_75" | "p76_99";
@@ -71,6 +72,7 @@ export default function Dashboard() {
   const [progFilter, setProgFilter] = useState<ProgressoFilter>("all");
   const [dateFrom, setDateFrom] = useState<string>(""); // yyyy-mm-dd
   const [dateTo, setDateTo] = useState<string>(""); // yyyy-mm-dd
+  const sessionUser = useContext(SessionContext);
 
   // Lookups
   useEffect(() => {
@@ -89,6 +91,10 @@ export default function Dashboard() {
       );
     }
     loadLookups();
+  }, []);
+
+  useEffect(() => {
+    console.log(sessionUser?.email);
   }, []);
 
   async function reloadProjects() {

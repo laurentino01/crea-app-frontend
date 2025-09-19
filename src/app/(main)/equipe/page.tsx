@@ -3,8 +3,8 @@
 import { Calendar, Mail, Phone, Plus, Shield, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
-import { userService } from "../../services/LocalStorageUserService";
-import type { tUserCreateDto, tUserPersisted } from "../../@types/tUser";
+import { userService } from "@/services/LocalStorageUserService";
+import type { tUserCreateDto, tUserPersisted } from "@/@types/tUser";
 import Card from "@/components/Card";
 import Link from "next/link";
 import SearchInput from "@/components/SearchInput";

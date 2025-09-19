@@ -4,9 +4,10 @@ import { useState } from "react";
 import { Circle, Eye, EyeOff, User } from "lucide-react";
 import Image from "next/image";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { loginUser } from "@/usecases/loginUser";
+import { loginUser, storageToken } from "@/usecases/authCases";
 import { authService } from "@/services/api/AuthService";
 import { tUserAuth } from "@/@types/tUser";
+import { redirect } from "next/navigation";
 
 export default function Login() {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -17,8 +18,11 @@ export default function Login() {
   } = useForm<tUserAuth>();
   const onSubmit: SubmitHandler<tUserAuth> = async (data) => {
     const res = await loginUser(authService, data);
-
-    console.log(res);
+    if (res.token) {
+      storageToken(authService, res.token);
+      redirect("dashboard");
+    } else {
+    }
   };
 
   const togglePasswordVisibility = () => {
