@@ -1,8 +1,11 @@
 "use client";
 
 import { useState, type Dispatch, type SetStateAction } from "react";
-import { X } from "lucide-react";
-import { clientService } from "@/services/LocalStorageClientService";
+import { Check, X } from "lucide-react";
+import { clienteService } from "@/services/api/ClienteService";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { tClienteCategoriaCreateDto } from "@/@types/tClient";
+import { createCategoria } from "@/usecases/clienteCases";
 
 type Props = {
   isOpen: boolean;
@@ -25,10 +28,26 @@ export default function ClienteModal({
   const [endereco, setEndereco] = useState("");
   const [descricao, setDescricao] = useState("");
   const [ativo, setAtivo] = useState(true);
-  const [selectedCategoria, setSelectedCategoria] = useState<string>("__none__");
+  const [selectedCategoria, setSelectedCategoria] =
+    useState<string>("__none__");
   const [newCategoria, setNewCategoria] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm<tClienteCategoriaCreateDto>();
+  const onSubmitCategoria: SubmitHandler<tClienteCategoriaCreateDto> = async (
+    data
+  ) => {
+    const res = await createCategoria(clienteService, data);
+
+    console.log(res);
+    return;
+  };
 
   if (!isOpen) return null;
 
@@ -95,7 +114,9 @@ export default function ClienteModal({
               if (categoriaValue) {
                 setAllCategories((prev) => {
                   if (prev.includes(categoriaValue)) return prev;
-                  return [...prev, categoriaValue].sort((a, b) => a.localeCompare(b));
+                  return [...prev, categoriaValue].sort((a, b) =>
+                    a.localeCompare(b)
+                  );
                 });
               }
 
@@ -197,12 +218,22 @@ export default function ClienteModal({
                 </select>
 
                 {selectedCategoria === "__new__" && (
-                  <input
-                    className="flex-1 rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-2 text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-fuchsia-600"
-                    placeholder="Digite o nome da categoria"
-                    value={newCategoria}
-                    onChange={(e) => setNewCategoria(e.target.value)}
-                  />
+                  <div className="flex gap-2">
+                    <input
+                      className="rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-2 text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 w-[85%] focus:outline-none focus:ring-2 focus:ring-fuchsia-600"
+                      placeholder="Digite o nome da categoria"
+                      value={newCategoria}
+                      {...register("titulo", { required: true })}
+                      onChange={(e) => setNewCategoria(e.target.value)}
+                    />
+                    <button
+                      type="submit"
+                      className="dark:hover:bg-neutral-800 hover:bg-neutral-50 rounded-full p-2   cursor-pointer transition duration-300 hover:text-green-500"
+                      onClick={handleSubmit(onSubmitCategoria)}
+                    >
+                      <Check />
+                    </button>
+                  </div>
                 )}
               </div>
             </div>

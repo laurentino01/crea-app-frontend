@@ -1,4 +1,4 @@
-import { tUserAuth, tUserPersisted, tUserSession } from "@/@types/tUser";
+import { tUserAuth, tUserSession } from "@/@types/tUser";
 import IAuthServices from "@/interfaces/IAuthServices";
 import { jwtDecode } from "jwt-decode";
 
@@ -16,14 +16,16 @@ class AuthService implements IAuthServices {
     return data;
   }
 
-  storageToken(token: string) {
+  async storageToken(token: string) {
     if (window === undefined) {
       return;
     }
     localStorage.setItem("token", token);
   }
 
-  getToken() {}
+  getToken() {
+    return localStorage.getItem("token");
+  }
 
   logout() {
     if (window === undefined) {

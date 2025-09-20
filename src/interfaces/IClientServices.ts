@@ -1,8 +1,15 @@
-import { tClientCreateDto, tClientListQuery, tClientPersisted } from "../@types/tClient";
+import {
+  tClientCreateDto,
+  tClienteCategoriaCreateDto,
+  tClientListQuery,
+  tClientPersisted,
+} from "../@types/tClient";
 
 export interface IClientServices {
   // Adds a new client record to storage
   create(client: tClientCreateDto): Promise<void>;
+  // Adds new Categoria
+  createCategoria(client: tClienteCategoriaCreateDto): Promise<void>;
   // Returns clients based on optional query params
   findAll(query?: tClientListQuery): Promise<tClientPersisted[]>;
   // Returns a single client by id (or null if not found)
@@ -13,4 +20,3 @@ export interface IClientServices {
     changes: Partial<Omit<tClientPersisted, "id">>
   ): Promise<tClientPersisted>;
 }
-
