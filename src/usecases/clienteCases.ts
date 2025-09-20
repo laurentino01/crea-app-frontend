@@ -1,4 +1,7 @@
-import { tClienteCategoriaCreateDto } from "@/@types/tClient";
+import {
+  tClienteCategoria,
+  tClienteCategoriaCreateDto,
+} from "@/@types/tClient";
 import { IClientServices } from "@/interfaces/IClientServices";
 
 export async function createCategoria(
@@ -6,4 +9,9 @@ export async function createCategoria(
   categoriaDto: tClienteCategoriaCreateDto
 ) {
   return await clienteService.createCategoria(categoriaDto);
+}
+export async function findAllCategorias(
+  clienteService: IClientServices
+): Promise<tClienteCategoria[]> {
+  return await clienteService.findAllCategorias();
 }

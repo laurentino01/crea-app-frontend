@@ -1,5 +1,6 @@
 import {
   tClientCreateDto,
+  tClienteCategoria,
   tClienteCategoriaCreateDto,
   tClientListQuery,
   tClientPersisted,
@@ -14,7 +15,9 @@ class ClienteService implements IClientServices {
 
   async create(client: tClientCreateDto): Promise<void> {}
 
-  async createCategoria(categoria: tClienteCategoriaCreateDto): Promise<void> {
+  async createCategoria(
+    categoria: tClienteCategoriaCreateDto
+  ): Promise<tClienteCategoria> {
     const res = await fetch(`${this.url}/categorias`, {
       method: "post",
       headers: {
@@ -22,6 +25,18 @@ class ClienteService implements IClientServices {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(categoria),
+    });
+
+    return await res.json();
+  }
+
+  async findAllCategorias(): Promise<tClienteCategoria[]> {
+    const res = await fetch(`${this.url}/categorias`, {
+      method: "get",
+      headers: {
+        Authorization: `${this.token}`,
+        "Content-Type": "application/json",
+      },
     });
     return await res.json();
   }

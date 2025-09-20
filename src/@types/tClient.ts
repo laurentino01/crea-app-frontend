@@ -17,3 +17,12 @@ export type tClientListQuery = {
 export type tClienteCategoriaCreateDto = {
   titulo: string;
 };
+
+export type tClienteCategoria = {
+  atualizadoEm: Date;
+  atualizadoPor: number;
+  criadoEm: Date;
+  criadoPor: number;
+  id: number;
+  titulo: string;
+};

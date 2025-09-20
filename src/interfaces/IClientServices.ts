@@ -1,5 +1,6 @@
 import {
   tClientCreateDto,
+  tClienteCategoria,
   tClienteCategoriaCreateDto,
   tClientListQuery,
   tClientPersisted,
@@ -9,7 +10,11 @@ export interface IClientServices {
   // Adds a new client record to storage
   create(client: tClientCreateDto): Promise<void>;
   // Adds new Categoria
-  createCategoria(client: tClienteCategoriaCreateDto): Promise<void>;
+  createCategoria(
+    client: tClienteCategoriaCreateDto
+  ): Promise<tClienteCategoria>;
+  // Returns categorias
+  findAllCategorias(): Promise<tClienteCategoria[]>;
   // Returns clients based on optional query params
   findAll(query?: tClientListQuery): Promise<tClientPersisted[]>;
   // Returns a single client by id (or null if not found)
