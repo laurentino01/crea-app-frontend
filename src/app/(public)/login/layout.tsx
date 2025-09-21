@@ -1,7 +1,11 @@
+"use client";
+
 import { ThemeProvider } from "next-themes";
 import "../../globals.css";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Metadata } from "next";
+import { ToastProvider } from "@/hooks/useToast";
+import { useEffect } from "react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,11 +17,6 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "Crea App",
-  description: "Sistema de gerenciamento de projetos da crea midia",
-};
-
 export default function LoginLayout({
   children,
 }: Readonly<{
@@ -28,7 +27,7 @@ export default function LoginLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased `}
       >
-        {children}
+        <ToastProvider>{children}</ToastProvider>
       </body>
     </html>
   );

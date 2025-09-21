@@ -8,9 +8,11 @@ import { loginUser, storageToken } from "@/usecases/authCases";
 import { authService } from "@/services/api/AuthService";
 import { tUserAuth } from "@/@types/tUser";
 import { redirect } from "next/navigation";
+import { useToast } from "@/hooks/useToast";
 
 export default function Login() {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const { push } = useToast();
   const {
     register,
     handleSubmit,
@@ -20,8 +22,16 @@ export default function Login() {
     const res = await loginUser(authService, data);
     if (res.token) {
       storageToken(authService, res.token);
+      push({
+        type: "success",
+        message: "Login feito com sucesso!. Bem vindo de volta :)",
+      });
       redirect("/");
     } else {
+      push({
+        type: "error",
+        message: "Falha no login. Verifique suas credenciais.",
+      });
     }
   };
 
