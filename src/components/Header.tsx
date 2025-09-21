@@ -56,7 +56,7 @@ export default function Header() {
   };
 
   useEffect(() => {
-    let slug = pathname.slice(1);
+    let slug = pathname === "/" ? "dashboard" : pathname.slice(1);
 
     if (slug.includes("/")) {
       setCurrentPage(slug.slice(0, slug.indexOf("/")));

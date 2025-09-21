@@ -20,7 +20,7 @@ export default function Login() {
     const res = await loginUser(authService, data);
     if (res.token) {
       storageToken(authService, res.token);
-      redirect("dashboard");
+      redirect("/");
     } else {
     }
   };

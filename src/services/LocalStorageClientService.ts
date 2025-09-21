@@ -1,5 +1,12 @@
-import { tClientCreateDto, tClientListQuery, tClientPersisted } from "../@types/tClient";
-import { IClientServices } from "../interfaces/IClientServices";
+import {
+  tClientCreateDto,
+  tCliente,
+  tClienteCategoria,
+  tClienteCategoriaCreateDto,
+  tClientListQuery,
+  tClientPersisted,
+} from "../@types/tClient";
+import { IClientServices } from "@/interfaces/IClientServices";
 
 const STORAGE_KEY = "clients";
 
@@ -56,7 +63,7 @@ function setStoredClients(clients: tClientPersisted[]): void {
 }
 
 export class LocalStorageClientService implements IClientServices {
-  async create(client: tClientCreateDto): Promise<void> {
+  async create(client: tClientCreateDto): Promise<tCliente> {
     const current = getStoredClients();
     const newClient: tClientPersisted = {
       id: generateId(),
@@ -64,6 +71,7 @@ export class LocalStorageClientService implements IClientServices {
     } as tClientPersisted;
     current.push(newClient);
     setStoredClients(current);
+    return {} as tCliente;
   }
 
   async findAll(query?: tClientListQuery): Promise<tClientPersisted[]> {
@@ -128,6 +136,16 @@ export class LocalStorageClientService implements IClientServices {
     all[idx] = updated;
     setStoredClients(all);
     return updated;
+  }
+
+  async createCategoria(
+    client: tClienteCategoriaCreateDto
+  ): Promise<tClienteCategoria> {
+    return (await {}) as tClienteCategoria;
+  }
+
+  async findAllCategorias(): Promise<tClienteCategoria[]> {
+    return (await {}) as tClienteCategoria[];
   }
 }
 

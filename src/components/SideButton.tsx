@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useState } from "react";
 
 export default function SideButton({
   children,
@@ -12,8 +12,11 @@ export default function SideButton({
   href: string;
 }) {
   const pathname = usePathname();
+  const [isActive, setIsActive] = useState(false);
 
-  const isActive = pathname.startsWith(href);
+  useEffect(() => {
+    setIsActive(pathname === href);
+  }, [pathname]);
 
   return (
     <Link

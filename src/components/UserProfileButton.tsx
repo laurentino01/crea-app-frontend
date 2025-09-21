@@ -32,7 +32,6 @@ export default function UserProfileButton({ name, onClick }: UserProfileProps) {
       label: "Sair",
       icon: LogOut,
       action: () => {
-        console.log("Sair");
         setOpen(false);
         buttonRef.current?.focus();
       },

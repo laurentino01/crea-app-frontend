@@ -1,5 +1,6 @@
 import {
   tClientCreateDto,
+  tCliente,
   tClienteCategoria,
   tClienteCategoriaCreateDto,
   tClientListQuery,
@@ -8,7 +9,7 @@ import {
 
 export interface IClientServices {
   // Adds a new client record to storage
-  create(client: tClientCreateDto): Promise<void>;
+  create(client: tClientCreateDto): Promise<tCliente>;
   // Adds new Categoria
   createCategoria(
     client: tClienteCategoriaCreateDto

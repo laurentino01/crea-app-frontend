@@ -1,8 +1,6 @@
 export type tClientCreateDto = {
   nome: string;
-  email: string;
   categoria: number;
-  telefone: string;
   descricao: string;
 };
 
@@ -25,4 +23,15 @@ export type tClienteCategoria = {
   criadoPor: number;
   id: number;
   titulo: string;
+};
+
+export type tCliente = {
+  atualizadoEm: Date;
+  atualizadoPor: number;
+  categoria: number;
+  criadoEm: Date;
+  criadoPor: number;
+  descricao: string;
+  id: number;
+  nome: string;
 };

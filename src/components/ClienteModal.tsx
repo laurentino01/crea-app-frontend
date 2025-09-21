@@ -5,10 +5,15 @@ import { Check, X } from "lucide-react";
 import { clienteService } from "@/services/api/ClienteService";
 import { SubmitHandler, useForm } from "react-hook-form";
 import {
+  tClientCreateDto,
   tClienteCategoria,
   tClienteCategoriaCreateDto,
 } from "@/@types/tClient";
-import { createCategoria, findAllCategorias } from "@/usecases/clienteCases";
+import {
+  create,
+  createCategoria,
+  findAllCategorias,
+} from "@/usecases/clienteCases";
 
 type Props = {
   isOpen: boolean;
@@ -16,14 +21,14 @@ type Props = {
   reload: () => Promise<void> | void;
 };
 
-export default function ClienteModal({ isOpen, onClose, reload }: Props) {
+type tFormCadastro = tClienteCategoriaCreateDto & tClientCreateDto;
+
+export default function ClienteModal({ isOpen, onClose }: Props) {
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [telefone, setTelefone] = useState("");
-  const [endereco, setEndereco] = useState("");
   const [categories, setCategories] = useState<tClienteCategoria[]>([]);
   const [descricao, setDescricao] = useState("");
-  const [ativo, setAtivo] = useState(true);
   const [selectedCategoria, setSelectedCategoria] =
     useState<string>("__none__");
   const [newCategoria, setNewCategoria] = useState("");
@@ -33,15 +38,26 @@ export default function ClienteModal({ isOpen, onClose, reload }: Props) {
   const {
     register,
     handleSubmit,
-    watch,
     formState: { errors },
-  } = useForm<tClienteCategoriaCreateDto>();
-  const onSubmitCategoria: SubmitHandler<tClienteCategoriaCreateDto> = async (
-    data
-  ) => {
-    const res = await createCategoria(clienteService, data);
+  } = useForm<tFormCadastro>();
+
+  const onSubmitCategoria: SubmitHandler<tFormCadastro> = async (data) => {
+    const categoria: tClienteCategoriaCreateDto = { titulo: data.titulo };
+
+    const res = await createCategoria(clienteService, categoria);
     categories.push(res);
     setSelectedCategoria(String(res.id));
+    return;
+  };
+
+  const onSubmitCliente: SubmitHandler<tFormCadastro> = async (data) => {
+    const cliente: tClientCreateDto = {
+      nome: data.nome,
+      categoria: data.categoria,
+      descricao: data.descricao,
+    };
+    const res = await create(clienteService, cliente);
+    console.log(res);
     return;
   };
 
@@ -87,7 +103,7 @@ export default function ClienteModal({ isOpen, onClose, reload }: Props) {
           </div>
         )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1  gap-4">
           <div>
             <label className="block text-sm font-medium text-neutral-800 dark:text-neutral-200 mb-1">
               Nome <span className="text-fuchsia-700">*</span>
@@ -96,34 +112,9 @@ export default function ClienteModal({ isOpen, onClose, reload }: Props) {
               type="text"
               required
               value={nome}
+              {...register("nome", { required: true })}
               onChange={(e) => setNome(e.target.value)}
               placeholder="Ex.: ACME Ltda"
-              className="w-full rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-2 text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-fuchsia-600"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-neutral-800 dark:text-neutral-200 mb-1">
-              Email
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="contato@cliente.com"
-              className="w-full rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-2 text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-fuchsia-600"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-neutral-800 dark:text-neutral-200 mb-1">
-              Telefone
-            </label>
-            <input
-              type="tel"
-              value={telefone}
-              onChange={(e) => setTelefone(e.target.value)}
-              placeholder="(11) 91234-5678"
               className="w-full rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-2 text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-fuchsia-600"
             />
           </div>
@@ -136,6 +127,7 @@ export default function ClienteModal({ isOpen, onClose, reload }: Props) {
               <select
                 className="rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-2 text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-fuchsia-600"
                 value={selectedCategoria}
+                {...register("categoria", { required: true })}
                 onChange={(e) => setSelectedCategoria(e.target.value)}
               >
                 <option value="__none__">Categorias</option>
@@ -174,6 +166,7 @@ export default function ClienteModal({ isOpen, onClose, reload }: Props) {
             </label>
             <textarea
               value={descricao}
+              {...register("descricao", { required: true })}
               onChange={(e) => setDescricao(e.target.value)}
               placeholder="Observações sobre o cliente"
               className="w-full rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-2 text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-fuchsia-600 min-h-20"
@@ -186,6 +179,7 @@ export default function ClienteModal({ isOpen, onClose, reload }: Props) {
             type="submit"
             disabled={saving}
             className="cursor-pointer inline-flex items-center gap-2 bg-fuchsia-900 hover:bg-purple-400 active:bg-fuchsia-950 text-white rounded-md px-4 py-2 disabled:opacity-50"
+            onClick={handleSubmit(onSubmitCliente)}
           >
             {saving ? "Salvando..." : "Cadastrar"}
           </button>

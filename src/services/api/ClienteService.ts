@@ -1,5 +1,6 @@
 import {
   tClientCreateDto,
+  tCliente,
   tClienteCategoria,
   tClienteCategoriaCreateDto,
   tClientListQuery,
@@ -13,7 +14,18 @@ class ClienteService implements IClientServices {
     process.env.API_URL ?? "http://localhost:4000/api/v1";
   private readonly token? = `Bearer ${authService.getToken()}`;
 
-  async create(client: tClientCreateDto): Promise<void> {}
+  async create(cliente: tClientCreateDto): Promise<tCliente> {
+    const res = await fetch(`${this.url}/clientes`, {
+      method: "post",
+      headers: {
+        Authorization: `${this.token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(cliente),
+    });
+
+    return await res.json();
+  }
 
   async createCategoria(
     categoria: tClienteCategoriaCreateDto
