@@ -52,12 +52,15 @@ class ClienteService implements IClientServices {
     });
     return await res.json();
   }
+
   async findAll(query?: tClientListQuery): Promise<tClientPersisted[]> {
     return [] as tClientPersisted[];
   }
+
   async findById(id: string): Promise<tClientPersisted | null> {
     return null;
   }
+
   async update(
     id: string,
     changes: Partial<Omit<tClientPersisted, "id">>
