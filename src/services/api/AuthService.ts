@@ -54,8 +54,10 @@ class AuthService implements IAuthServices {
     if (window === undefined) {
       return false;
     }
+    const now = Math.floor(Date.now() / 1000);
+    const data = this.getUserData();
 
-    return !!localStorage.getItem("token");
+    return data !== undefined && data.exp > now;
   }
 
   // Valida se é adm

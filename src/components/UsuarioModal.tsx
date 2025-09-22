@@ -3,8 +3,11 @@
 import { useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { X } from "lucide-react";
-import { userService } from "@/services/LocalStorageUserService";
+
 import type { tUserCreateDto } from "@/@types/tUser";
+import { userService } from "@/services/api/UserServices";
+import { authService } from "@/services/api/AuthService";
+import { useToast } from "@/hooks/useToast";
 
 type Props = {
   isOpen: boolean;
@@ -33,24 +36,33 @@ export default function UsuarioModal({ isOpen, onClose, onCreated }: Props) {
     onClose();
   }, [onClose, reset]);
 
-  const onSubmit = handleSubmit(async (values) => {
+  const { push } = useToast();
+
+  const onSubmit = handleSubmit(async (data) => {
     const dto: tUserCreateDto = {
-      nomeCompleto: values.nomeCompleto,
-      apelido: values.apelido,
-      email: values.email,
-      senha: values.senha,
-      senhaConfirm: values.senhaConfirm,
-      dataNascimento: values.dataNascimento
-        ? new Date(values.dataNascimento)
-        : undefined,
-      isAdm: values.isAdm,
-      ativo: values.ativo,
+      nomeCompleto: data.nomeCompleto,
+      apelido: data.apelido,
+      email: data.email,
+      password: data.senha,
+      passwordConfirm: data.senhaConfirm,
     };
 
-    await userService.create(dto);
-    handleClose();
-    if (onCreated) {
-      await onCreated();
+    const res = await userService.create(dto);
+    console.log(res);
+    if (res.id) {
+      push({
+        type: "success",
+        message: `Usuário ${res.apelido} Foi adicionado à equipe com sucesso!`,
+      });
+      if (onCreated) {
+        await onCreated();
+      }
+      handleClose();
+    } else {
+      push({
+        type: "error",
+        message: `Oops, algo deu errado, por favor tente novamente mais tarde.`,
+      });
     }
   });
 
@@ -126,17 +138,6 @@ export default function UsuarioModal({ isOpen, onClose, onCreated }: Props) {
 
             <div>
               <label className="block text-sm font-medium text-neutral-800 dark:text-neutral-200 mb-1">
-                Data de nascimento
-              </label>
-              <input
-                type="date"
-                {...register("dataNascimento")}
-                className="w-full rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-2 text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-fuchsia-600"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-neutral-800 dark:text-neutral-200 mb-1">
                 Senha <span className="text-fuchsia-700">*</span>
               </label>
               <input
@@ -149,8 +150,7 @@ export default function UsuarioModal({ isOpen, onClose, onCreated }: Props) {
 
             <div>
               <label className="block text-sm font-medium text-neutral-800 dark:text-neutral-200 mb-1">
-                Confirmação de senha{" "}
-                <span className="text-fuchsia-700">*</span>
+                Confirmação de senha <span className="text-fuchsia-700">*</span>
               </label>
               <input
                 type="password"
@@ -159,36 +159,6 @@ export default function UsuarioModal({ isOpen, onClose, onCreated }: Props) {
                 className="w-full rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-2 text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-fuchsia-600"
               />
             </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <input
-              id="isAdmin"
-              type="checkbox"
-              {...register("isAdm")}
-              className="cursor-pointer h-4 w-4 rounded border-neutral-300 dark:border-neutral-700 text-fuchsia-700 focus:ring-fuchsia-600"
-            />
-            <label
-              htmlFor="isAdmin"
-              className="cursor-pointer text-sm text-neutral-800 dark:text-neutral-200 select-none"
-            >
-              Administrador
-            </label>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <input
-              id="isActive"
-              type="checkbox"
-              {...register("ativo")}
-              className="cursor-pointer h-4 w-4 rounded border-neutral-300 dark:border-neutral-700 text-fuchsia-700 focus:ring-fuchsia-600"
-            />
-            <label
-              htmlFor="isActive"
-              className="cursor-pointer text-sm text-neutral-800 dark:text-neutral-200 select-none"
-            >
-              Ativo
-            </label>
           </div>
 
           <div className="flex justify-end">

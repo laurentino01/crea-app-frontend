@@ -2,16 +2,19 @@ export enum UserRole {
   ADM = "ADM",
   EDITOR = "EDITOR",
 }
+export enum FlowTime {
+  CHECKOUT = "CHECKOUT",
+  CHECKIN = "CHECKIN",
+  PAUSE = "PAUSE",
+  PLAY = "PLAY",
+}
 
 export type tUserCreateDto = {
+  email: string;
+  password: string;
+  passwordConfirm: string;
   nomeCompleto: string;
   apelido: string;
-  email: string;
-  senha: string;
-  senhaConfirm: string;
-  dataNascimento?: Date;
-  isAdm: boolean;
-  ativo: boolean; // indica se o usuário está ativo/inativo
 };
 
 export type tUserPersisted = { id: string } & Omit<
@@ -24,6 +27,19 @@ export type tUserListQuery = {
   isAdm?: boolean;
 };
 
+export type tUSer = {
+  apelido: string;
+  atualizadoEm: Date;
+  atualizadoPor: number;
+  criadoEm: Date;
+  criadoPor: number;
+  email: string;
+  flowTime: FlowTime;
+  id: number;
+  nomeCompleto: string;
+  role: UserRole;
+};
+
 export type tUserAuth = {
   email: string;
   password: string;
@@ -31,8 +47,8 @@ export type tUserAuth = {
 
 export type tUserSession = {
   email: string;
-  exp: Date;
-  iat: Date;
+  exp: number;
+  iat: number;
   id: number;
   nomeCompleto: string;
   primeiroLogin: boolean;

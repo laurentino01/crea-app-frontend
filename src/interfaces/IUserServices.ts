@@ -1,8 +1,13 @@
-import { tUserCreateDto, tUserPersisted, tUserListQuery } from "../@types/tUser";
+import {
+  tUserCreateDto,
+  tUserPersisted,
+  tUserListQuery,
+  tUSer,
+} from "../@types/tUser";
 
 export interface IUserServices {
   // Adds a new user record to storage
-  create(user: tUserCreateDto): Promise<void>;
+  create(user: tUserCreateDto): Promise<tUSer>;
   // Returns users based on optional query params
   findAll(query?: tUserListQuery): Promise<tUserPersisted[]>;
   // Returns a single user by id (or null if not found)

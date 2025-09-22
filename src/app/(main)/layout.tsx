@@ -13,6 +13,7 @@ import { authService } from "@/services/api/AuthService";
 import { redirect, usePathname } from "next/navigation";
 import { SessionContext } from "@/providers/SessionProvider";
 import { tUserSession } from "@/@types/tUser";
+import { ToastProvider } from "@/hooks/useToast";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -60,16 +61,18 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange // evita flicker de transição
           >
-            <div className="flex">
-              <SideNav />
+            <ToastProvider>
+              <div className="flex">
+                <SideNav />
 
-              <main className="overflow-auto flex-1 p-5 min-h-[200vh]">
-                {/* Inicializa mocks opcionalmente via env var */}
-                <DevMockInitializer />
-                <Header />
-                {children}
-              </main>
-            </div>
+                <main className="overflow-auto flex-1 p-5 min-h-[200vh]">
+                  {/* Inicializa mocks opcionalmente via env var */}
+                  <DevMockInitializer />
+                  <Header />
+                  {children}
+                </main>
+              </div>
+            </ToastProvider>
           </ThemeProvider>
         </SessionContext>
       </body>

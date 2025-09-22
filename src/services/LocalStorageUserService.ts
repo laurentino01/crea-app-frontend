@@ -55,7 +55,7 @@ function setStoredUsers(users: tUserPersisted[]): void {
 
 export class LocalStorageUserService implements IUserServices {
   async create(user: tUserCreateDto): Promise<void> {
-    const { senhaConfirm, ...persist } = user;
+    const { passwordConfirm, ...persist } = user;
     const current = getStoredUsers();
     const newUser: tUserPersisted = {
       id: generateId(),
