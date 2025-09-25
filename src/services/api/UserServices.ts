@@ -35,6 +35,7 @@ class UserService implements IUserServices {
 
     return await res.json();
   }
+
   async findById(id: string): Promise<tUserPersisted | null> {
     return {} as tUserPersisted;
   }

@@ -9,11 +9,12 @@ export enum ProjetoEtapa {
   Concluido = "concluido",
 }
 
-export enum ProjetoCriticidade {
-  Baixa = "baixa",
-  Media = "media",
-  Alta = "alta",
-  Urgente = "urgente",
+export enum PrioridadeProjeto {
+  BAIXA = "BAIXA",
+  MEDIA = "MEDIA",
+  ALTA = "ALTA",
+  URGENTE = "URGENTE",
+  CRITICO = "CRITICO",
 }
 
 // IDs auxiliares
@@ -23,7 +24,7 @@ export type tIdChat = string;
 
 // Tipos auxiliares
 export type tProjetoEtapa = ProjetoEtapa;
-export type tProjetoCriticidade = ProjetoCriticidade;
+export type tProjetoCriticidade = PrioridadeProjeto;
 
 // Status de execução de uma etapa (não confundir com o tipo/"nome" da etapa)
 export enum ProjetoEtapaStatus {
@@ -66,20 +67,18 @@ export type tChat = {
 // Projeto (similar ao padrão de Client/User)
 export type tProjectCreateDto = {
   nome: string;
+
   descricao: string;
-  urlArquivos: string;
-  etapa: tProjetoEtapa;
-  criticidade: tProjetoCriticidade;
-  isAtrasado: boolean;
-  cliente: string; // id do cliente
+
+  linkArquivos: string;
+
+  cliente: number;
+
+  prioridade: PrioridadeProjeto;
+
   dataInicio: Date;
-  dataFimPrevisto: Date;
-  dataFimReal?: Date;
-  historico?: tProjetoHistoricoItem[];
-  responsavel: tIdUsuario;
-  chat?: tChat[];
-  equipe?: tEquipe[];
-  etapas?: tProjetoEtapaItem[]; // status por etapa do workflow
+
+  dataFim: Date;
 };
 
 export type tProjectPersisted = { id: tIdProjeto } & tProjectCreateDto;

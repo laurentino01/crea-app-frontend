@@ -2,7 +2,7 @@
 // Usa IDs dos mocks de usuários e clientes para relacionamentos
 
 import {
-  ProjetoCriticidade,
+  PrioridadeProjeto,
   ProjetoEtapa,
   ProjetoEtapaStatus,
   tProjectPersisted,
@@ -65,7 +65,9 @@ function etapas(
     idProjeto,
     etapa: et,
     status:
-      andamento && andamento.etapa === et ? andamento.status : ProjetoEtapaStatus.NaoIniciado,
+      andamento && andamento.etapa === et
+        ? andamento.status
+        : ProjetoEtapaStatus.NaoIniciado,
   }));
 }
 
@@ -76,7 +78,7 @@ export const PROJECTS_DEFAULT: tProjectPersisted[] = [
     descricao: "Série de vídeos curtos de onboarding para app",
     urlArquivos: "https://files.example.test/novatech/onboarding",
     etapa: ProjetoEtapa.Decupagem,
-    criticidade: ProjetoCriticidade.Media,
+    criticidade: PrioridadeProjeto.Media,
     isAtrasado: false,
     cliente: C.NOVATECH,
     dataInicio: new Date("2025-08-20"),
@@ -105,7 +107,7 @@ export const PROJECTS_DEFAULT: tProjectPersisted[] = [
     descricao: "Série de vídeos para campanha de verão",
     urlArquivos: "https://files.example.test/goldenfit/verao-2025",
     etapa: ProjetoEtapa.Revisao,
-    criticidade: ProjetoCriticidade.Alta,
+    criticidade: PrioridadeProjeto.Alta,
     isAtrasado: true,
     cliente: C.GOLDENFIT,
     dataInicio: new Date("2025-07-01"),
@@ -134,7 +136,7 @@ export const PROJECTS_DEFAULT: tProjectPersisted[] = [
     descricao: "Edição e pós de documentário institucional",
     urlArquivos: "https://files.example.test/campo-verde/doc",
     etapa: ProjetoEtapa.Sonorizacao,
-    criticidade: ProjetoCriticidade.Baixa,
+    criticidade: PrioridadeProjeto.Baixa,
     isAtrasado: false,
     cliente: C.CAMPOVERDE,
     dataInicio: new Date("2025-05-10"),
@@ -159,7 +161,7 @@ export const PROJECTS_DEFAULT: tProjectPersisted[] = [
     descricao: "Série curta de estudos de caso filmados",
     urlArquivos: "https://files.example.test/urbanx/cases",
     etapa: ProjetoEtapa.PosProducao,
-    criticidade: ProjetoCriticidade.Media,
+    criticidade: PrioridadeProjeto.Media,
     isAtrasado: false,
     cliente: C.URBANX,
     dataInicio: new Date("2025-06-05"),
@@ -176,7 +178,7 @@ export const PROJECTS_DEFAULT: tProjectPersisted[] = [
     descricao: "Trailer 60s para campanha institucional",
     urlArquivos: "https://files.example.test/midiaforte/trailer-2025",
     etapa: ProjetoEtapa.Analise,
-    criticidade: ProjetoCriticidade.Urgente,
+    criticidade: PrioridadeProjeto.Urgente,
     isAtrasado: true,
     cliente: C.MIDIAFORTE,
     dataInicio: new Date("2025-08-01"),
@@ -197,7 +199,7 @@ export const PROJECTS_DEFAULT: tProjectPersisted[] = [
     descricao: "Conteúdo para e-commerce de produtos pet",
     urlArquivos: "https://files.example.test/petlover/howto",
     etapa: ProjetoEtapa.AguardandoArquivos,
-    criticidade: ProjetoCriticidade.Baixa,
+    criticidade: PrioridadeProjeto.Baixa,
     isAtrasado: false,
     cliente: C.PETLOVER,
     dataInicio: new Date("2025-09-01"),
@@ -210,15 +212,13 @@ export const PROJECTS_DEFAULT: tProjectPersisted[] = [
     descricao: "Gravação e edição de 4 webinars",
     urlArquivos: "https://files.example.test/educar/webinars",
     etapa: ProjetoEtapa.Revisao,
-    criticidade: ProjetoCriticidade.Media,
+    criticidade: PrioridadeProjeto.Media,
     isAtrasado: false,
     cliente: C.EDUCAR,
     dataInicio: new Date("2025-07-15"),
     dataFimPrevisto: new Date("2025-09-05"),
     responsavel: U.DIEGO,
-    equipe: [
-      { idProjeto: "PRJ-EDU-WEBINAR-007", idUsuario: U.CAROL },
-    ],
+    equipe: [{ idProjeto: "PRJ-EDU-WEBINAR-007", idUsuario: U.CAROL }],
   },
   {
     id: "PRJ-GCH-RECEITAS-008",
@@ -226,7 +226,7 @@ export const PROJECTS_DEFAULT: tProjectPersisted[] = [
     descricao: "Série de vídeos de receitas",
     urlArquivos: "https://files.example.test/gourmetchef/receitas-t2",
     etapa: ProjetoEtapa.Concluido,
-    criticidade: ProjetoCriticidade.Baixa,
+    criticidade: PrioridadeProjeto.Baixa,
     isAtrasado: false,
     cliente: C.GOURMETCHEF,
     dataInicio: new Date("2025-04-01"),
@@ -240,7 +240,7 @@ export const PROJECTS_DEFAULT: tProjectPersisted[] = [
     descricao: "Teaser de 30s para lançamento de feature",
     urlArquivos: "https://files.example.test/novatech/teaser",
     etapa: ProjetoEtapa.PosProducao,
-    criticidade: ProjetoCriticidade.Urgente,
+    criticidade: PrioridadeProjeto.Urgente,
     isAtrasado: true,
     cliente: C.NOVATECH,
     dataInicio: new Date("2025-08-25"),
@@ -253,7 +253,7 @@ export const PROJECTS_DEFAULT: tProjectPersisted[] = [
     descricao: "Conteúdos curtos para redes sociais",
     urlArquivos: "https://files.example.test/goldenfit/shorts",
     etapa: ProjetoEtapa.Decupagem,
-    criticidade: ProjetoCriticidade.Media,
+    criticidade: PrioridadeProjeto.Media,
     isAtrasado: false,
     cliente: C.GOLDENFIT,
     dataInicio: new Date("2025-08-15"),
@@ -266,7 +266,7 @@ export const PROJECTS_DEFAULT: tProjectPersisted[] = [
     descricao: "Série de vídeos de bastidores do rebrand",
     urlArquivos: "https://files.example.test/urbanx/rebrand",
     etapa: ProjetoEtapa.Analise,
-    criticidade: ProjetoCriticidade.Alta,
+    criticidade: PrioridadeProjeto.Alta,
     isAtrasado: false,
     cliente: C.URBANX,
     dataInicio: new Date("2025-06-10"),
@@ -279,7 +279,7 @@ export const PROJECTS_DEFAULT: tProjectPersisted[] = [
     descricao: "Vídeo comemorativo de 10 anos",
     urlArquivos: "https://files.example.test/midiaforte/case-10",
     etapa: ProjetoEtapa.Sonorizacao,
-    criticidade: ProjetoCriticidade.Media,
+    criticidade: PrioridadeProjeto.Media,
     isAtrasado: false,
     cliente: C.MIDIAFORTE,
     dataInicio: new Date("2025-07-05"),
@@ -316,7 +316,9 @@ export function getProjectsFromLocalStorage(): tProjectPersisted[] | null {
       ...p,
       // Campos obrigatórios devem sempre ser Date
       dataInicio: p.dataInicio ? new Date(p.dataInicio as any) : new Date(),
-      dataFimPrevisto: p.dataFimPrevisto ? new Date(p.dataFimPrevisto as any) : new Date(),
+      dataFimPrevisto: p.dataFimPrevisto
+        ? new Date(p.dataFimPrevisto as any)
+        : new Date(),
       // Campo opcional permanece opcional
       dataFimReal: p.dataFimReal ? new Date(p.dataFimReal as any) : undefined,
       historico: (p.historico ?? []).map((h) => ({

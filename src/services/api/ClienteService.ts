@@ -53,8 +53,16 @@ class ClienteService implements IClientServices {
     return await res.json();
   }
 
-  async findAll(query?: tClientListQuery): Promise<tClientPersisted[]> {
-    return [] as tClientPersisted[];
+  async findAll(query?: tClientListQuery): Promise<tCliente[]> {
+    const res = await fetch(`${this.url}/clientes`, {
+      method: "get",
+      headers: {
+        Authorization: `${this.token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    return await res.json();
   }
 
   async findById(id: string): Promise<tClientPersisted | null> {

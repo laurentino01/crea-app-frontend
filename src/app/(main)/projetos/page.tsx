@@ -18,7 +18,7 @@ import type {
   tProjetoEtapa,
   tProjetoCriticidade,
 } from "@/@types/tProject";
-import { ProjetoEtapa, ProjetoCriticidade } from "@/@types/tProject";
+import { ProjetoEtapa, PrioridadeProjeto } from "@/@types/tProject";
 import { Doughnut } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -56,7 +56,7 @@ export default function Projetos() {
   // Lookup maps for client and user names
   const [clientNames, setClientNames] = useState<Record<string, string>>({});
   const [userNames, setUserNames] = useState<Record<string, string>>({});
-  const [allClients, setAllClients] = useState<{ id: string; nome: string }[]>(
+  const [allClientes, setAllClients] = useState<{ id: string; nome: string }[]>(
     []
   );
   const [allUsers, setAllUsers] = useState<
@@ -73,7 +73,7 @@ export default function Projetos() {
   const [dataInicio, setDataInicio] = useState<string>(""); // yyyy-mm-dd
   const [dataFimPrevisto, setDataFimPrevisto] = useState<string>(""); // yyyy-mm-dd
   const [criticidade, setCriticidade] = useState<tProjetoCriticidade>(
-    ProjetoCriticidade.Media
+    PrioridadeProjeto.Media
   );
   const [selectedEquipe, setSelectedEquipe] = useState<Set<string>>(new Set());
 
@@ -277,7 +277,7 @@ export default function Projetos() {
       setClienteId("");
       setDataInicio("");
       setDataFimPrevisto("");
-      setCriticidade(ProjetoCriticidade.Media);
+      setCriticidade(PrioridadeProjeto.Media);
       setSelectedEquipe(new Set());
       setIsAddOpen(false);
       await reload();
@@ -645,15 +645,11 @@ export default function Projetos() {
         isOpen={isAddOpen}
         onClose={() => setIsAddOpen(false)}
         reload={reload}
-        allClients={allClients}
-        allUsers={allUsers}
       />
       <ClienteModal
         isOpen={isClienteAddOpen}
         onClose={() => setIsClienteAddOpen(false)}
         reload={reloadClients}
-        allCategories={allCategories}
-        setAllCategories={setAllCategories}
       />
     </>
   );

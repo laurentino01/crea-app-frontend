@@ -17,7 +17,7 @@ export interface IClientServices {
   // Returns categorias
   findAllCategorias(): Promise<tClienteCategoria[]>;
   // Returns clients based on optional query params
-  findAll(query?: tClientListQuery): Promise<tClientPersisted[]>;
+  findAll(query?: tClientListQuery): Promise<tCliente[]>;
   // Returns a single client by id (or null if not found)
   findById(id: string): Promise<tClientPersisted | null>;
   // Updates a client by id with partial changes and returns the updated entity
