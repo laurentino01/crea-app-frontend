@@ -1,5 +1,5 @@
 import {
-  tUSer,
+  tUser,
   tUserCreateDto,
   tUserListQuery,
   tUserPersisted,
@@ -11,7 +11,7 @@ class UserService implements IUserServices {
   private readonly url: string =
     process.env.API_URL ?? "http://localhost:4000/api/v1";
   private readonly token? = `Bearer ${authService.getToken()}`;
-  async create(user: tUserCreateDto): Promise<tUSer> {
+  async create(user: tUserCreateDto): Promise<tUser> {
     const res = await fetch(`${this.url}/usuarios`, {
       method: "post",
       headers: {
@@ -23,8 +23,17 @@ class UserService implements IUserServices {
 
     return await res.json();
   }
-  async findAll(query?: tUserListQuery): Promise<tUserPersisted[]> {
-    return [];
+  async findAll(query?: tUserListQuery): Promise<tUser[]> {
+    console.log("opa");
+    const res = await fetch(`${this.url}/usuarios`, {
+      method: "get",
+      headers: {
+        Authorization: `${this.token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    return await res.json();
   }
   async findById(id: string): Promise<tUserPersisted | null> {
     return {} as tUserPersisted;

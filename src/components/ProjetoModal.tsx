@@ -1,19 +1,21 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { X } from "lucide-react";
 import SearchInput from "@/components/SearchInput";
 import Avatar from "@/components/Avatar";
 import { projectService } from "@/services/LocalStorageProjectService";
 import type { tProjetoCriticidade } from "@/@types/tProject";
 import { ProjetoEtapa, ProjetoCriticidade } from "@/@types/tProject";
+import { tUser } from "@/@types/tUser";
+import { fetchUsers } from "@/usecases/userCases";
+import { userService } from "@/services/api/UserServices";
 
 type Props = {
   isOpen: boolean;
   onClose: () => void;
   reload: () => Promise<void> | void;
   allClients: { id: string; nome: string }[];
-  allUsers: { id: string; nome: string; apelido?: string }[];
 };
 
 export default function ProjetoModal({
@@ -21,10 +23,10 @@ export default function ProjetoModal({
   onClose,
   reload,
   allClients,
-  allUsers,
 }: Props) {
   const [nome, setNome] = useState("");
   const [descricao, setDescricao] = useState("");
+  const [allUsers, setAllUsers] = useState<tUser[]>([]);
   const [clienteId, setClienteId] = useState<string>("");
   const [dataInicio, setDataInicio] = useState<string>("");
   const [dataFimPrevisto, setDataFimPrevisto] = useState<string>("");
@@ -36,11 +38,11 @@ export default function ProjetoModal({
   const [error, setError] = useState<string | null>(null);
   const [teamSearch, setTeamSearch] = useState("");
 
-  const toggleEquipe = (id: string) => {
+  const toggleEquipe = (id: number) => {
     setSelectedEquipe((prev) => {
       const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
+      if (next.has(String(id))) next.delete(String(id));
+      else next.add(String(id));
       return next;
     });
   };
@@ -49,11 +51,22 @@ export default function ProjetoModal({
     const term = teamSearch.trim().toLowerCase();
     if (!term) return allUsers;
     return allUsers.filter((u) => {
-      const nome = (u.nome || "").toLowerCase();
+      const nome = (u.apelido || "").toLowerCase();
       const apelido = (u.apelido || "").toLowerCase();
       return nome.includes(term) || apelido.includes(term);
     });
   }, [allUsers, teamSearch]);
+
+  async function fetchAll() {
+    const res = await fetchUsers(userService);
+    return res;
+  }
+
+  useEffect(() => {
+    fetchAll().then((data) => {
+      setAllUsers(data);
+    });
+  }, []);
 
   if (!isOpen) return null;
 
@@ -174,6 +187,19 @@ export default function ProjetoModal({
                 className="w-full rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-2 text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-fuchsia-600"
               />
             </div>
+            <div className="sm:col-span-2">
+              <label className="block text-sm font-medium text-neutral-800 dark:text-neutral-200 mb-1">
+                Link Arquivos<span className="text-fuchsia-700">*</span>
+              </label>
+              <input
+                type="text"
+                required
+                value={nome}
+                onChange={(e) => setNome(e.target.value)}
+                placeholder="Ex.: https://drive.google/..."
+                className="w-full rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-2 text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-fuchsia-600"
+              />
+            </div>
 
             <div className="sm:col-span-2">
               <label className="block text-sm font-medium text-neutral-800 dark:text-neutral-200 mb-1">
@@ -258,12 +284,12 @@ export default function ProjetoModal({
             </div>
             {allUsers.length > 0 && (
               <div className="mb-2">
-                <SearchInput
+                {/* <SearchInput
                   placeholder="Buscar membros da equipe"
                   value={teamSearch}
                   onChange={setTeamSearch}
                   size="sm"
-                />
+                /> */}
               </div>
             )}
             {allUsers.length === 0 ? (
@@ -271,7 +297,7 @@ export default function ProjetoModal({
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-auto pr-1">
                 {filteredUsers.map((u) => {
-                  const checked = selectedEquipe.has(u.id);
+                  const checked = selectedEquipe.has(String(u.id));
                   return (
                     <label
                       key={u.id}
@@ -284,9 +310,11 @@ export default function ProjetoModal({
                         className="h-4 w-4 rounded border-neutral-300 dark:border-neutral-700 text-fuchsia-700 focus:ring-fuchsia-600"
                       />
                       <span className="inline-flex items-center gap-2">
-                        <Avatar name={u.nome} size="sm" />
+                        <Avatar name={u.apelido ?? u.nomeCompleto} size="sm" />
 
-                        <span className="truncate">{u.nome}</span>
+                        <span className="truncate">
+                          {u.apelido ?? u.nomeCompleto}
+                        </span>
                       </span>
                     </label>
                   );
@@ -309,4 +337,3 @@ export default function ProjetoModal({
     </div>
   );
 }
-

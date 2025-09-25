@@ -27,7 +27,7 @@ export type tUserListQuery = {
   isAdm?: boolean;
 };
 
-export type tUSer = {
+export type tUser = {
   apelido: string;
   atualizadoEm: Date;
   atualizadoPor: number;
