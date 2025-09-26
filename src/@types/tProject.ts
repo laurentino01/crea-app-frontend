@@ -64,7 +64,10 @@ export type tChat = {
   segundoUsuario: tIdUsuario;
 };
 
-// Projeto (similar ao padrão de Client/User)
+export type tProjetoUsuarioDto = {
+  usuario: number;
+};
+
 export type tProjectCreateDto = {
   nome: string;
 
@@ -79,6 +82,8 @@ export type tProjectCreateDto = {
   dataInicio: Date;
 
   dataFim: Date;
+
+  equipe: tProjetoUsuarioDto[];
 };
 
 export type tProjectPersisted = { id: tIdProjeto } & tProjectCreateDto;

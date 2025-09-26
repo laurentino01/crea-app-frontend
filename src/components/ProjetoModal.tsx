@@ -4,8 +4,12 @@ import { useEffect, useMemo, useState } from "react";
 import { Plus, X } from "lucide-react";
 import SearchInput from "@/components/SearchInput";
 import Avatar from "@/components/Avatar";
-import { projectService } from "@/services/LocalStorageProjectService";
-import type { tProjectCreateDto, tProjetoCriticidade } from "@/@types/tProject";
+import { projectService } from "@/services/api/ProjetoService";
+import type {
+  tProjectCreateDto,
+  tProjetoCriticidade,
+  tProjetoUsuarioDto,
+} from "@/@types/tProject";
 import { ProjetoEtapa, PrioridadeProjeto } from "@/@types/tProject";
 import { tUser } from "@/@types/tUser";
 import { fetchUsers } from "@/usecases/userCases";
@@ -14,6 +18,10 @@ import { tCliente } from "@/@types/tClient";
 import { clienteService } from "@/services/api/ClienteService";
 import { fetchClientes } from "@/usecases/clienteCases";
 import { SubmitHandler, useForm } from "react-hook-form";
+import { authService } from "@/services/api/AuthService";
+import { create } from "@/usecases/projetoCases";
+import { redirect } from "next/navigation";
+import { useToast } from "@/hooks/useToast";
 
 type Props = {
   isOpen: boolean;
@@ -22,20 +30,15 @@ type Props = {
 };
 
 export default function ProjetoModal({ isOpen, onClose, reload }: Props) {
-  const [nome, setNome] = useState("");
-  const [descricao, setDescricao] = useState("");
   const [allUsers, setAllUsers] = useState<tUser[]>([]);
   const [allClientes, setAllClientes] = useState<tCliente[]>([]);
-  const [dataInicio, setDataInicio] = useState<string>("");
-  const [dataFimPrevisto, setDataFimPrevisto] = useState<string>("");
-  const [criticidade, setCriticidade] = useState<tProjetoCriticidade>(
-    PrioridadeProjeto.ALTA
+  const [selectedEquipe, setSelectedEquipe] = useState<tProjetoUsuarioDto[]>(
+    []
   );
-  const [selectedEquipe, setSelectedEquipe] = useState<Set<string>>(new Set());
+  const { push } = useToast();
   const [saving, setSaving] = useState(false);
   const [teamSearch, setTeamSearch] = useState("");
   const [clientesSearch, setClientesSearch] = useState("");
-
   const { register, handleSubmit } = useForm<tProjectCreateDto>();
 
   const filteredUsers = useMemo(() => {
@@ -58,19 +61,36 @@ export default function ProjetoModal({ isOpen, onClose, reload }: Props) {
     });
   }, [allClientes, clientesSearch]);
 
-  const createProjetct: SubmitHandler<tProjectCreateDto> = (
+  const createProjetct: SubmitHandler<tProjectCreateDto> = async (
     data: tProjectCreateDto
   ) => {
-    console.log(data);
+    toggleEquipe(authService.getUserId());
+    data.equipe = selectedEquipe;
+    const novopProjeto = await create(projectService, data);
+
+    if (novopProjeto) {
+      push({
+        type: "success",
+        message: "Projeto Criado com sucesso! Etapa: Aguardando Arquivos. :)",
+      });
+      redirect(`projetos/${novopProjeto.id}`);
+    } else {
+      push({
+        type: "error",
+        message:
+          "Oops, Algo deu errado :(. Por favor, tente novamente mais tarde.",
+      });
+    }
   };
 
   function toggleEquipe(id: number) {
-    setSelectedEquipe((prev) => {
-      const next = new Set(prev);
-      if (next.has(String(id))) next.delete(String(id));
-      else next.add(String(id));
-      return next;
-    });
+    const hasUser = selectedEquipe.find((u) => u.usuario === id);
+
+    if (hasUser) {
+      setSelectedEquipe(selectedEquipe.filter((u) => u.usuario !== id));
+    } else {
+      setSelectedEquipe([...selectedEquipe, { usuario: id }]);
+    }
   }
 
   async function fetchAllUsers() {
@@ -259,7 +279,9 @@ export default function ProjetoModal({ isOpen, onClose, reload }: Props) {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-auto pr-1">
                 {filteredUsers.map((u) => {
-                  const checked = selectedEquipe.has(String(u.id));
+                  const checked = selectedEquipe.some(
+                    (user) => user.usuario === u.id
+                  );
                   return (
                     <label
                       key={u.id}
@@ -268,6 +290,7 @@ export default function ProjetoModal({ isOpen, onClose, reload }: Props) {
                       <input
                         type="checkbox"
                         checked={checked}
+                        onChange={() => toggleEquipe(u.id)}
                         className="h-4 w-4 rounded border-neutral-300 dark:border-neutral-700 text-fuchsia-700 focus:ring-fuchsia-600"
                       />
                       <span className="inline-flex items-center gap-2">

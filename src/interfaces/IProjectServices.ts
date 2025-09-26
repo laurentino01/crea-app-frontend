@@ -13,8 +13,8 @@ import {
 
 export interface IProjectServices {
   // CRUD básico
-  create(project: tProjectCreateDto): Promise<void>;
-  findAll(query?: tProjectListQuery): Promise<tProjectPersisted[]>;
+  create(project: tProjectCreateDto): Promise<{ id: number }>;
+  /*  findAll(query?: tProjectListQuery): Promise<tProjectPersisted[]>;
   findById(id: string): Promise<tProjectPersisted | null>;
   update(
     id: string,
@@ -68,5 +68,5 @@ export interface IProjectServices {
     oldUserId: tIdUsuario,
     newUserId: tIdUsuario
   ): Promise<tProjectPersisted>;
-  removeEquipeMember(projectId: string, userId: tIdUsuario): Promise<tProjectPersisted>;
+  removeEquipeMember(projectId: string, userId: tIdUsuario): Promise<tProjectPersisted>; */
 }

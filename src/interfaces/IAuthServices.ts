@@ -5,4 +5,5 @@ export default interface IAuthServices {
   storageToken(token: string): void;
   isLogged(): boolean;
   getUserData(): any;
+  getUserId(): number;
 }

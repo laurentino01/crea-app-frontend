@@ -34,7 +34,9 @@ class AuthService implements IAuthServices {
     localStorage.removeItem("token");
   }
 
-  getUserId() {}
+  getUserId() {
+    return this.getUserData()?.id!;
+  }
 
   getUserRole() {}
 
