@@ -24,7 +24,6 @@ class UserService implements IUserServices {
     return await res.json();
   }
   async findAll(query?: tUserListQuery): Promise<tUser[]> {
-    console.log("opa");
     const res = await fetch(`${this.url}/usuarios`, {
       method: "get",
       headers: {
@@ -36,8 +35,16 @@ class UserService implements IUserServices {
     return await res.json();
   }
 
-  async findById(id: string): Promise<tUserPersisted | null> {
-    return {} as tUserPersisted;
+  async findById(id: string): Promise<tUser | null> {
+    const res = await fetch(`${this.url}/usuarios/${id}`, {
+      method: "get",
+      headers: {
+        Authorization: `${this.token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    return await res.json();
   }
 
   async update(

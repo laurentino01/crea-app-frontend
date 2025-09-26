@@ -6,6 +6,8 @@ import { Search } from "lucide-react";
 import SearchInput from "./SearchInput";
 import ThemeToggle from "./ThemeToggle";
 import NotificationButton from "./NotificationButton";
+import { tUserSession } from "@/@types/tUser";
+import { authService } from "@/services/api/AuthService";
 
 type tPageTitle = {
   title: string;
@@ -23,6 +25,9 @@ type tPages = {
 export default function Header() {
   const pathname = usePathname();
   const [currentPage, setCurrentPage] = useState<any>("dashboard");
+  const [sessionUser, setSessionUser] = useState<tUserSession>(
+    {} as tUserSession
+  );
 
   const pageTitle: any = {
     dashboard: {
@@ -53,7 +58,15 @@ export default function Header() {
       title: "Login",
       explain: "Visão de desenvolvimento",
     },
+    perfil: {
+      title: "Perfil",
+      explain: "Atualize suas informações pessoais",
+    },
   };
+
+  useEffect(() => {
+    setSessionUser(authService.getUserData()!);
+  }, []);
 
   useEffect(() => {
     let slug = pathname === "/" ? "dashboard" : pathname.slice(1);
@@ -81,8 +94,7 @@ export default function Header() {
         <ThemeToggle />
         <NotificationButton />
         <UserProfileButton
-          name="Godofredo Australoptecus"
-          onClick={() => console.log("clicaram-me")}
+          name={`${sessionUser?.apelido ?? sessionUser?.nomeCompleto!}`}
         ></UserProfileButton>
       </div>
     </header>

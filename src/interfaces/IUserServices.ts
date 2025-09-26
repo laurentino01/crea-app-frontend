@@ -11,7 +11,7 @@ export interface IUserServices {
   // Returns users based on optional query params
   findAll(query?: tUserListQuery): Promise<tUser[]>;
   // Returns a single user by id (or null if not found)
-  findById(id: string): Promise<tUserPersisted | null>;
+  findById(id: string): Promise<tUser | null>;
   // Updates a user by id with partial changes and returns the updated entity
   update(
     id: string,

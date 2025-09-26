@@ -1,4 +1,4 @@
-import { tUserAuth, tUserSession } from "@/@types/tUser";
+import { tUserAuth, tUserSession, UserRole } from "@/@types/tUser";
 import IAuthServices from "@/interfaces/IAuthServices";
 import { jwtDecode } from "jwt-decode";
 
@@ -53,17 +53,31 @@ class AuthService implements IAuthServices {
 
   /** Valida se está logado */
   isLogged() {
-    if (window === undefined) {
-      return false;
-    }
-    const now = Math.floor(Date.now() / 1000);
+    const token = this.getToken();
     const data = this.getUserData();
+    const now = Math.floor(Date.now() / 1000);
 
-    return data !== undefined && data.exp > now;
+    if (!token) {
+      return "semtoken";
+    }
+
+    if (!data?.exp) {
+      return "invalido"; // ou "semexp", se quiser diferenciar
+    }
+
+    if (data.exp < now) {
+      return "expirado";
+    }
+
+    return "valido";
   }
 
   // Valida se é adm
-  isAdm() {}
+  isAdm() {
+    const data = this.getUserData();
+
+    return data?.role === UserRole.ADM;
+  }
 }
 
 export const authService = new AuthService();

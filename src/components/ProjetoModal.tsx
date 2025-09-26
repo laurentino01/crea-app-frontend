@@ -227,6 +227,7 @@ export default function ProjetoModal({ isOpen, onClose, reload }: Props) {
               <div className="mb-2">
                 <SearchInput
                   placeholder="Buscar membros da equipe"
+                  onChange={setClientesSearch}
                   value={clientesSearch}
                   size="sm"
                 />
@@ -269,6 +270,7 @@ export default function ProjetoModal({ isOpen, onClose, reload }: Props) {
               <div className="mb-2">
                 <SearchInput
                   placeholder="Buscar membros da equipe"
+                  onChange={setTeamSearch}
                   value={teamSearch}
                   size="sm"
                 />

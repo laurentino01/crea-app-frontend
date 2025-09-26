@@ -11,9 +11,15 @@ export async function loginUser(
 export function storageToken(authServices: IAuthServices, token: string): void {
   authServices.storageToken(token);
 }
-export function isLogged(authServices: IAuthServices): boolean {
+export function isLogged(
+  authServices: IAuthServices
+): "semtoken" | "expirado" | "valido" | "invalido" {
   return authServices.isLogged();
 }
 export function getUserData(authServices: IAuthServices): any {
   return authServices.getUserData();
+}
+
+export function logout(authServices: IAuthServices): void {
+  return authServices.logout();
 }

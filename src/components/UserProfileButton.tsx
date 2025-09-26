@@ -2,6 +2,9 @@
 import { ChevronDown, ChevronUp, LogOut, Settings, User } from "lucide-react";
 import Avatar from "./Avatar";
 import { useEffect, useRef, useState } from "react";
+import { logout } from "@/usecases/authCases";
+import { authService } from "@/services/api/AuthService";
+import { redirect } from "next/navigation";
 
 type UserProfileProps = {
   name: string;
@@ -22,9 +25,7 @@ export default function UserProfileButton({ name, onClick }: UserProfileProps) {
       label: "Perfil",
       icon: User,
       action: () => {
-        onClick?.();
-        setOpen(false);
-        buttonRef.current?.focus();
+        redirect("perfil");
       },
     },
 
@@ -32,8 +33,8 @@ export default function UserProfileButton({ name, onClick }: UserProfileProps) {
       label: "Sair",
       icon: LogOut,
       action: () => {
-        setOpen(false);
-        buttonRef.current?.focus();
+        logout(authService);
+        redirect("login");
       },
     },
   ];
@@ -145,7 +146,7 @@ export default function UserProfileButton({ name, onClick }: UserProfileProps) {
           aria-labelledby="user-menu-button"
           ref={menuRef}
           onKeyDown={onMenuKeyDown}
-          className="absolute right-0 mt-2 z-50 w-56 origin-top-right rounded-xl shadow  bg-white dark:bg-neutral-800 text-neutral-800 dark:text-neutral-100 shadow-lg ring-1 ring-black/5 focus:outline-none animate-in fade-in-0 zoom-in-95"
+          className="absolute right-0 mt-2 z-50 w-56 origin-top-right rounded-xl bg-white dark:bg-neutral-800 text-neutral-800 dark:text-neutral-100 shadow-lg ring-1 ring-black/5 focus:outline-none animate-in fade-in-0 zoom-in-95"
         >
           <div className="py-2">
             {items.map((item, idx) => (

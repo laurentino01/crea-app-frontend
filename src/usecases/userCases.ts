@@ -11,3 +11,9 @@ export async function fetchUsers(
 ): Promise<tUser[]> {
   return userServices.findAll(query);
 }
+export async function fetchOne(
+  userServices: IUserServices,
+  id: number
+): Promise<tUser | null> {
+  return userServices.findById(String(id));
+}

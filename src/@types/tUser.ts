@@ -52,5 +52,6 @@ export type tUserSession = {
   id: number;
   nomeCompleto: string;
   primeiroLogin: boolean;
+  apelido: string;
   role: UserRole;
 };

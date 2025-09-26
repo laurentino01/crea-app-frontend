@@ -1,8 +1,8 @@
 "use client";
 
 import type { Metadata } from "next";
+import "@/app/globals.css";
 import { Geist, Geist_Mono } from "next/font/google";
-import "../globals.css";
 import SideNav from "@/components/SideNav";
 import { ThemeProvider } from "next-themes";
 import Header from "@/components/Header";
@@ -33,17 +33,18 @@ export default function RootLayout({
   const params = usePathname();
 
   useEffect(() => {
-    if (!isLogged(authService)) {
-      alert("Login expirado, por favor faça novamente o login :)");
-      redirect("login");
+    const authenticated: "semtoken" | "expirado" | "valido" | "invalido" =
+      isLogged(authService);
+
+    if (authenticated === "semtoken" || authenticated === "invalido") {
+      return redirect("login");
+    } else if (authenticated === "expirado") {
+      alert("Sessão expirada. Por favor, faça login novamente :)");
+      return redirect("login");
+    } else {
+      setSessionUser(getUserData(authService));
     }
   }, [params]);
-  useEffect(() => {
-    if (!isLogged(authService)) {
-      return;
-    }
-    setSessionUser(getUserData(authService));
-  }, []);
 
   return (
     <html
