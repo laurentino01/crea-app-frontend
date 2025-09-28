@@ -3,6 +3,8 @@ import {
   tUserPersisted,
   tUserListQuery,
   tUser,
+  tUserUpdateDto,
+  tResUpdate,
 } from "../@types/tUser";
 
 export interface IUserServices {
@@ -13,8 +15,5 @@ export interface IUserServices {
   // Returns a single user by id (or null if not found)
   findById(id: string): Promise<tUser | null>;
   // Updates a user by id with partial changes and returns the updated entity
-  update(
-    id: string,
-    changes: Partial<Omit<tUserPersisted, "id">>
-  ): Promise<tUserPersisted>;
+  update(changes: tUserUpdateDto): Promise<tResUpdate>;
 }

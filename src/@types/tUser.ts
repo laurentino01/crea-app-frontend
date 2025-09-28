@@ -40,6 +40,23 @@ export type tUser = {
   role: UserRole;
 };
 
+export type tUserUpdateDto = {
+  id?: number;
+  email?: string;
+  password?: string;
+  passwordConfirm?: string;
+  nomeCompleto?: string;
+  apelido?: string;
+  flowTime?: FlowTime;
+  role?: UserRole;
+  primeiroAcesso?: boolean;
+};
+
+export type tResUpdate = {
+  res: any;
+  senhaAlterada: boolean;
+};
+
 export type tUserAuth = {
   email: string;
   password: string;

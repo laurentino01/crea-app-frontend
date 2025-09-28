@@ -33,6 +33,16 @@ export default function RootLayout({
   const params = usePathname();
 
   useEffect(() => {
+    if (
+      authService.getUserData()?.primeiroLogin &&
+      !params.includes("perfil")
+    ) {
+      alert(
+        "Bem vindo à Crea App, o nosso gerenciador de projetos. Por favor, altere sua senha padrão. :)"
+      );
+      return redirect("perfil");
+    }
+
     const authenticated: "semtoken" | "expirado" | "valido" | "invalido" =
       isLogged(authService);
 

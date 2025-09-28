@@ -1,8 +1,10 @@
 import {
+  tResUpdate,
   tUser,
   tUserCreateDto,
   tUserListQuery,
   tUserPersisted,
+  tUserUpdateDto,
 } from "@/@types/tUser";
 import { IUserServices } from "@/interfaces/IUserServices";
 import { authService } from "./AuthService";
@@ -47,11 +49,17 @@ class UserService implements IUserServices {
     return await res.json();
   }
 
-  async update(
-    id: string,
-    changes: Partial<Omit<tUserPersisted, "id">>
-  ): Promise<tUserPersisted> {
-    return {} as tUserPersisted;
+  async update(changes: tUserUpdateDto): Promise<tResUpdate> {
+    const res = await fetch(`${this.url}/usuarios`, {
+      method: "put",
+      headers: {
+        Authorization: `${this.token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(changes),
+    });
+
+    return await res.json();
   }
 }
 
