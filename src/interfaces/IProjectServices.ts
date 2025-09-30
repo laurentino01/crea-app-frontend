@@ -9,18 +9,20 @@ import {
   tProjectPersisted,
   tProjetoHistoricoItem,
   tProjetoEtapaItem,
+  tProject,
 } from "../@types/tProject";
 
 export interface IProjectServices {
   // CRUD básico
   create(project: tProjectCreateDto): Promise<{ id: number }>;
-  /*  findAll(query?: tProjectListQuery): Promise<tProjectPersisted[]>;
-  findById(id: string): Promise<tProjectPersisted | null>;
-  update(
-    id: string,
+  /*  findAll(query?: tProjectListQuery): Promise<tProjectPersisted[]>; */
+  findById(id: number): Promise<tProject>;
+  findEquipe(id: number): Promise<any>;
+  /*   update(
+    id: number,
     changes: Partial<Omit<tProjectPersisted, "id">>
-  ): Promise<tProjectPersisted>;
-
+  ): Promise<tProjectPersisted>; */
+  /* 
   // Etapa (status)
   changeEtapa(
     id: string,

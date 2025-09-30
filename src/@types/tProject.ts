@@ -1,3 +1,5 @@
+import { tCliente } from "./tClient";
+
 export enum ProjetoEtapa {
   AguardandoArquivos = "aguardando_arquivos",
   Decupagem = "decupagem",
@@ -15,6 +17,13 @@ export enum PrioridadeProjeto {
   ALTA = "ALTA",
   URGENTE = "URGENTE",
   CRITICO = "CRITICO",
+}
+
+export enum ProgressoProjeto {
+  NO_PRAZO = "NO_PRAZO",
+  ADIANTADO = "ADIANTADO",
+  ATRASADO = "ATRASADO",
+  MUITO_ATRASADO = "MUITO_ATRASADO",
 }
 
 // IDs auxiliares
@@ -98,4 +107,40 @@ export type tProjectListQuery = {
   // Filtros adicionais
   categoriaCliente?: string; // categoria do cliente (igualdade exata, case-insensitive)
   dataFimPrevistoAte?: Date; // filtra projetos com data fim prevista até esta data (inclusive)
+};
+
+export type tUsuarioEquipe = {
+  id: number;
+  nomecompleto: string;
+  apelido: string;
+};
+
+export type tProject = {
+  id: number;
+
+  nome: string;
+
+  descricao: string;
+
+  linkArquivos: string;
+
+  cliente: tCliente;
+
+  prioridade: PrioridadeProjeto;
+
+  progressoStatus: ProgressoProjeto;
+
+  dataInicio: Date;
+
+  dataFinalizado: Date;
+
+  dataFim: Date;
+
+  criadoEm: Date;
+
+  criadoPor: number;
+
+  atualizadoEm: Date;
+
+  atualizadoPor: number;
 };

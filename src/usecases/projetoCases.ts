@@ -7,3 +7,16 @@ export async function create(
 ) {
   return await projectService.create(projectCreateDto);
 }
+
+export async function findById(
+  projectService: IProjectServices,
+  idProjeto: number
+) {
+  return await projectService.findById(idProjeto);
+}
+export async function findEquipe(
+  projectService: IProjectServices,
+  idProjeto: number
+) {
+  return await projectService.findEquipe(idProjeto);
+}
