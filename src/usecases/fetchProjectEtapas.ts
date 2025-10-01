@@ -1,10 +1,9 @@
 import type { IProjectServices } from "@/interfaces/IProjectServices";
-import type { tProjetoEtapaItem } from "@/@types/tProject";
+import type { tProjetoEtapa } from "@/@types/tProject";
 
 export async function fetchProjectEtapas(
   projectServices: IProjectServices,
   projectId: string
-): Promise<tProjetoEtapaItem[]> {
+): Promise<tProjetoEtapa[]> {
   return projectServices.getEtapas(projectId);
 }
-

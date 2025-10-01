@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { useParams, usePathname } from "next/navigation";
+import { useParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
 import ProgressBar from "@/components/ProgressBar";
@@ -10,14 +10,15 @@ import ProjectEtapaBadge from "@/components/ProjectEtapaBadge";
 import ProjectCriticidadeBadge from "@/components/ProjectCriticidadeBadge";
 import ProjectPrazoBadge from "@/components/ProjectPrazoBadge";
 
-import { projectService } from "@/services/LocalStorageProjectService";
+import { projectService } from "@/services/api/ProjetoService";
 import type {
-  tProjectPersisted,
+  tProject,
   tProjetoEtapa,
   tProjetoEtapaItem,
 } from "@/@types/tProject";
-import { ProjetoEtapaStatus } from "@/@types/tProject";
+import { EtapaStatus, ProjetoEtapa } from "@/@types/tProject";
 import DetailTabs from "@/components/DetailTabs";
+import { findById, findByProjetoEStatus } from "@/usecases/projetoCases";
 
 enum eTabs {
   informacoes = "informacoes",
@@ -29,7 +30,7 @@ enum eTabs {
 }
 
 // Progresso baseado no status por etapa
-function etapasProgressPct(etapas: tProjetoEtapaItem[] | undefined): number {
+/* function etapasProgressPct(etapas: tProjetoEtapa[] | undefined): number {
   if (!etapas || etapas.length === 0) return 0;
   const allDescont = etapas.every(
     (e) => e.status === ProjetoEtapaStatus.Descontinuado
@@ -44,22 +45,22 @@ function etapasProgressPct(etapas: tProjetoEtapaItem[] | undefined): number {
     (e) => e.status === ProjetoEtapaStatus.Concluido
   ).length;
   return Math.round((done / valid.length) * 100);
-}
+} */
 
 export default function projetoDetalhesLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const params = useParams<{ id: string }>();
-  const pathName = usePathname();
-  const projectId = params?.id as string | undefined;
+  const { id } = useParams<{ id: string }>();
 
-  const [project, setProject] = useState<tProjectPersisted | null>(null);
-  const [etapas, setEtapas] = useState<tProjetoEtapaItem[]>([]);
+  const [project, setProject] = useState<tProject | null>(null);
+
+  const [etapa, setEtapa] = useState<tProjetoEtapaItem>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentTab, setCurrentTab] = useState<eTabs>(eTabs.informacoes);
+  const [progresso, setProgresso] = useState(0);
 
   const tabsTitle = {
     informacoes: { title: "Informações do Projeto" },
@@ -70,92 +71,71 @@ export default function projetoDetalhesLayout({
     workflow: { title: "workflow do projeto" },
   };
 
+  async function findProjetoInfos() {
+    const res = await findById(projectService, Number(id));
+    if (res) {
+      setProject(res);
+    }
+  }
+  async function findEtapa() {
+    const res = await findByProjetoEStatus(
+      projectService,
+      Number(id),
+      EtapaStatus.ANDAMENTO
+    );
+    if (res) {
+      setEtapa(res);
+      setProgresso(
+        Object.keys(ProjetoEtapa).filter((etapa) => etapa !== res.etapa).length
+      );
+    }
+  }
+
   useEffect(() => {
-    const pathLenght = pathName.length;
-    const lastBar = pathName.lastIndexOf("/") + 1;
-    let pathSliced: any = pathName.slice(lastBar, pathLenght);
-    const isEnum = Object.values(eTabs).includes(pathSliced as eTabs);
+    findProjetoInfos();
+    findEtapa();
 
-    if (!isEnum) {
-      pathSliced = eTabs.informacoes;
-    }
-
-    setCurrentTab(pathSliced);
-  }, [pathName]);
-
-  useEffect(() => {
-    async function load() {
-      try {
-        if (!projectId) return;
-        const proj = await projectService.findById(projectId);
-        const etps = await projectService.getEtapas(projectId);
-        if (!proj) {
-          setError("Projeto não encontrado");
-          return;
-        }
-        setProject(proj);
-        setEtapas(etps);
-      } finally {
-        setLoading(false);
-      }
-    }
-    load();
-    // escuta atualizações
-    function onUpdated(e: any) {
-      if (e?.detail?.id === projectId) load();
-    }
-    if (typeof window !== "undefined") {
-      window.addEventListener("project-updated", onUpdated as any);
-    }
-
-    return () => {
-      if (typeof window !== "undefined") {
-        window.removeEventListener("project-updated", onUpdated as any);
-      }
-    };
-  }, [projectId]);
-
-  const progress = useMemo(() => etapasProgressPct(etapas), [etapas]);
+    console.log(progresso);
+  }, []);
 
   return (
     <main className="space-y-4">
       {/* Cabeçalho do projeto (compartilhado entre as rotas filhas) */}
-      {!loading && project && (
-        <section className="rounded-lg p-4">
-          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
-            <div className="min-w-0 flex">
-              <div className="flex items-center gap-4">
-                <Link
-                  href="/projetos"
-                  className="inline-flex h-8 items-center gap-2 text-sm px-3 py-2 rounded-md border bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 cursor-pointer"
-                >
-                  <ArrowLeft size={16} /> Voltar
-                </Link>
-                <div>
-                  <h1 className="text-xl font-extrabold truncate">
-                    {project.nome}
-                  </h1>
-                  {project.descricao && (
-                    <p className="text-sm text-neutral-600 dark:text-neutral-300 truncate">
-                      {project.descricao}
-                    </p>
-                  )}
-                </div>
+
+      <section className="rounded-lg p-4">
+        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
+          <div className="min-w-0 flex">
+            <div className="flex items-center gap-4">
+              <Link
+                href="/projetos"
+                className="inline-flex h-8 items-center gap-2 text-sm px-3 py-2 rounded-md border bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 cursor-pointer"
+              >
+                <ArrowLeft size={16} /> Voltar
+              </Link>
+              <div>
+                <h1 className="text-xl font-extrabold truncate">
+                  {project?.nome}
+                </h1>
+                {project?.descricao && (
+                  <p className="text-sm text-neutral-600 dark:text-neutral-300 truncate">
+                    {project.descricao}
+                  </p>
+                )}
               </div>
             </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <ProjectEtapaBadge etapa={project.etapa} />
-              <ProjectCriticidadeBadge criticidade={project.criticidade} />
-              {typeof project.isAtrasado === "boolean" && (
-                <ProjectPrazoBadge isAtrasado={project.isAtrasado} />
-              )}
-            </div>
           </div>
-          <div className="mt-3">
-            <ProgressBar value={progress} showLabel size="md" />
+          <div className="flex flex-wrap items-center gap-2">
+            <ProjectEtapaBadge etapa={etapa?.etapa!} />
+            <ProjectCriticidadeBadge criticidade={project?.prioridade!} />
+            {typeof project?.progressoStatus === "boolean" && (
+              <ProjectPrazoBadge isAtrasado={project.progressoStatus} />
+            )}
           </div>
-        </section>
-      )}
+        </div>
+        <div className="mt-3">
+          <ProgressBar value={progresso} showLabel size="md" />
+        </div>
+      </section>
 
       <DetailTabs
         items={[

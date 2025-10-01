@@ -1,15 +1,9 @@
 import {
-  ProjetoEtapa,
-  ProjetoEtapaStatus,
-  tChat,
-  tEquipe,
-  tIdUsuario,
   tProjectCreateDto,
-  tProjectListQuery,
-  tProjectPersisted,
-  tProjetoHistoricoItem,
-  tProjetoEtapaItem,
   tProject,
+  tUsuarioEquipe,
+  EtapaStatus,
+  tProjetoEtapaItem,
 } from "../@types/tProject";
 
 export interface IProjectServices {
@@ -17,7 +11,11 @@ export interface IProjectServices {
   create(project: tProjectCreateDto): Promise<{ id: number }>;
   /*  findAll(query?: tProjectListQuery): Promise<tProjectPersisted[]>; */
   findById(id: number): Promise<tProject>;
-  findEquipe(id: number): Promise<any>;
+  findEquipe(id: number): Promise<tUsuarioEquipe[]>;
+  findByProjetoEStatus(
+    id: number,
+    status: EtapaStatus
+  ): Promise<tProjetoEtapaItem>;
   /*   update(
     id: number,
     changes: Partial<Omit<tProjectPersisted, "id">>

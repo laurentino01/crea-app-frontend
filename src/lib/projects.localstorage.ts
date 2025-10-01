@@ -7,7 +7,7 @@ import {
   ProjetoEtapaStatus,
   tProjectPersisted,
   tProjetoHistoricoItem,
-  tProjetoEtapaItem,
+  tProjetoEtapa,
 } from "@/@types/tProject";
 
 export const PROJECTS_LS_KEY = "projects";
@@ -51,7 +51,7 @@ function h(
 function etapas(
   idProjeto: string,
   andamento?: { etapa: ProjetoEtapa; status: ProjetoEtapaStatus }
-): tProjetoEtapaItem[] {
+): tProjetoEtapa[] {
   const base: ProjetoEtapa[] = [
     ProjetoEtapa.AguardandoArquivos,
     ProjetoEtapa.Decupagem,

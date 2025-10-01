@@ -12,22 +12,20 @@ type Props = {
 
 function etapaLabel(etapa: tProjetoEtapa): string {
   switch (etapa) {
-    case ProjetoEtapa.AguardandoArquivos:
+    case ProjetoEtapa.AGUARDANDO_ARQUIVOS:
       return "Aguardando arquivos";
-    case ProjetoEtapa.Decupagem:
+    case ProjetoEtapa.DECUPAGEM:
       return "Decupagem";
-    case ProjetoEtapa.Revisao:
+    case ProjetoEtapa.REVISAO:
       return "Revisão";
-    case ProjetoEtapa.Sonorizacao:
+    case ProjetoEtapa.SONORIZACAO:
       return "Sonorização";
-    case ProjetoEtapa.PosProducao:
+    case ProjetoEtapa.POS_PRODUCAO:
       return "Pós-produção";
-    case ProjetoEtapa.Analise:
+    case ProjetoEtapa.ANALISE:
       return "Análise";
-    case ProjetoEtapa.Concluido:
+    case ProjetoEtapa.FINALIZADO:
       return "Concluído";
-    case ProjetoEtapa.Descontinuado:
-      return "Descontinuado";
     default:
       return String(etapa);
   }

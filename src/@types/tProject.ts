@@ -1,14 +1,13 @@
 import { tCliente } from "./tClient";
 
 export enum ProjetoEtapa {
-  AguardandoArquivos = "aguardando_arquivos",
-  Decupagem = "decupagem",
-  Revisao = "revisao",
-  Sonorizacao = "sonorizacao",
-  PosProducao = "pos_producao",
-  Descontinuado = "descontinuado",
-  Analise = "analise",
-  Concluido = "concluido",
+  AGUARDANDO_ARQUIVOS = "AGUARDANDO_ARQUIVOS",
+  DECUPAGEM = "DECUPAGEM",
+  REVISAO = "REVISAO",
+  SONORIZACAO = "SONORIZACAO",
+  POS_PRODUCAO = "POS_PRODUCAO",
+  ANALISE = "ANALISE",
+  FINALIZADO = "FINALIZADO",
 }
 
 export enum PrioridadeProjeto {
@@ -47,7 +46,7 @@ export type tProjetoEtapaItem = {
   id: string;
   idProjeto: tIdProjeto;
   etapa: tProjetoEtapa; // qual etapa do workflow este item representa
-  status: ProjetoEtapaStatus;
+  status: EtapaStatus;
   dataInicio?: Date;
   dataFim?: Date;
   responsavel?: tIdUsuario;
@@ -72,6 +71,12 @@ export type tChat = {
   primeiroUsuario: tIdUsuario;
   segundoUsuario: tIdUsuario;
 };
+
+export enum EtapaStatus {
+  NAO_INICIADO = "NAO_INICIADO",
+  ANDAMENTO = "ANDAMENTO",
+  CONCLUIDO = "CONCLUIDO",
+}
 
 export type tProjetoUsuarioDto = {
   usuario: number;

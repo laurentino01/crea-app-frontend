@@ -1,4 +1,10 @@
-import { tProject, tProjectCreateDto, tUsuarioEquipe } from "@/@types/tProject";
+import {
+  EtapaStatus,
+  tProject,
+  tProjectCreateDto,
+  tProjetoEtapaItem,
+  tUsuarioEquipe,
+} from "@/@types/tProject";
 import { IProjectServices } from "@/interfaces/IProjectServices";
 import { authService } from "./AuthService";
 
@@ -33,6 +39,21 @@ class ProjetoService implements IProjectServices {
 
   async findEquipe(idProjeto: number): Promise<tUsuarioEquipe[]> {
     const res = await fetch(`${this.url}/projeto-usuario/${idProjeto}`, {
+      method: "get",
+      headers: {
+        Authorization: `${this.token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    return await res.json();
+  }
+
+  async findByProjetoEStatus(
+    idProjeto: number,
+    status: EtapaStatus
+  ): Promise<tProjetoEtapaItem> {
+    const res = await fetch(`${this.url}/etapa/${idProjeto}?status=${status}`, {
       method: "get",
       headers: {
         Authorization: `${this.token}`,

@@ -10,7 +10,7 @@ import { userService } from "@/services/LocalStorageUserService";
 import type {
   tProjectPersisted,
   tProjetoEtapa,
-  tProjetoEtapaItem,
+  tProjetoEtapa,
 } from "@/@types/tProject";
 import { ProjetoEtapa, ProjetoEtapaStatus } from "@/@types/tProject";
 import {
@@ -41,7 +41,7 @@ const etapaOptions: { value: tProjetoEtapa; label: string }[] = [
 ];
 
 // Progresso baseado no status por etapa
-function etapasProgressPct(etapas: tProjetoEtapaItem[] | undefined): number {
+function etapasProgressPct(etapas: tProjetoEtapa[] | undefined): number {
   if (!etapas || etapas.length === 0) return 0;
   const allDescont = etapas.every(
     (e) => e.status === ProjetoEtapaStatus.Descontinuado
@@ -60,9 +60,9 @@ function etapasProgressPct(etapas: tProjetoEtapaItem[] | undefined): number {
 export default function Dashboard() {
   // ===== Projetos ativos (tabela nova) =====
   const [projects, setProjects] = useState<tProjectPersisted[]>([]);
-  const [etapasMap, setEtapasMap] = useState<
-    Record<string, tProjetoEtapaItem[]>
-  >({});
+  const [etapasMap, setEtapasMap] = useState<Record<string, tProjetoEtapa[]>>(
+    {}
+  );
   const [clientNames, setClientNames] = useState<Record<string, string>>({});
   const [userNames, setUserNames] = useState<Record<string, string>>({});
 

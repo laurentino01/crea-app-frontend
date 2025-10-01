@@ -8,7 +8,7 @@ import {
   tProjectListQuery,
   tProjectPersisted,
   tProjetoHistoricoItem,
-  tProjetoEtapaItem,
+  tProjetoEtapa,
 } from "../@types/tProject";
 import { IProjectServices } from "../interfaces/IProjectServices";
 import { clientService } from "./LocalStorageClientService";
@@ -157,7 +157,8 @@ export class LocalStorageProjectService implements IProjectServices {
     }
 
     // Precarrega clientes apenas se necessário (categoria ou pesquisa por nome de cliente)
-    let clientsCache: Awaited<ReturnType<typeof clientService.findAll>> | null = null;
+    let clientsCache: Awaited<ReturnType<typeof clientService.findAll>> | null =
+      null;
     const ensureClients = async () => {
       if (!clientsCache) clientsCache = await clientService.findAll();
       return clientsCache;
@@ -392,35 +393,35 @@ export class LocalStorageProjectService implements IProjectServices {
   }
 
   // ====== Workflow por etapa ======
-  async getEtapas(projectId: string): Promise<tProjetoEtapaItem[]> {
+  async getEtapas(projectId: string): Promise<tProjetoEtapa[]> {
     const proj = await this.findById(projectId);
-    return (proj?.etapas ?? []) as tProjetoEtapaItem[];
+    return (proj?.etapas ?? []) as tProjetoEtapa[];
   }
 
   async updateEtapaItem(
     projectId: string,
     etapa: ProjetoEtapa,
-    changes: Partial<Omit<tProjetoEtapaItem, "id" | "idProjeto" | "etapa">>
-  ): Promise<tProjetoEtapaItem> {
+    changes: Partial<Omit<tProjetoEtapa, "id" | "idProjeto" | "etapa">>
+  ): Promise<tProjetoEtapa> {
     const all = getStoredProjects();
     const pIdx = all.findIndex((p) => p.id === projectId);
     if (pIdx === -1) throw new Error("Project not found");
-    const etapas = [...(all[pIdx].etapas ?? [])] as tProjetoEtapaItem[];
+    const etapas = [...(all[pIdx].etapas ?? [])] as tProjetoEtapa[];
     let eIdx = etapas.findIndex((e) => e.etapa === etapa);
     // Se a etapa não existir ainda (projetos antigos ou dados inconsistentes), cria-a
     if (eIdx === -1) {
-      const newItem: tProjetoEtapaItem = {
+      const newItem: tProjetoEtapa = {
         id: generateId(),
         idProjeto: projectId,
         etapa,
         status: ProjetoEtapaStatus.NaoIniciado,
-      } as tProjetoEtapaItem;
+      } as tProjetoEtapa;
       etapas.push(newItem);
       eIdx = etapas.length - 1;
     }
 
     const prev = etapas[eIdx];
-    let next: tProjetoEtapaItem = { ...prev, ...changes } as tProjetoEtapaItem;
+    let next: tProjetoEtapa = { ...prev, ...changes } as tProjetoEtapa;
 
     // Regras automáticas de datas conforme status
     if (changes.status) {
@@ -464,7 +465,7 @@ export class LocalStorageProjectService implements IProjectServices {
     const all = getStoredProjects();
     const idx = all.findIndex((p) => p.id === projectId);
     if (idx === -1) throw new Error("Project not found");
-    const etapas = (all[idx].etapas ?? []) as tProjetoEtapaItem[];
+    const etapas = (all[idx].etapas ?? []) as tProjetoEtapa[];
     const now = new Date();
     const nextEtapas = etapas.map((e) => {
       if (e.status === ProjetoEtapaStatus.Descontinuado) return e;
@@ -473,7 +474,7 @@ export class LocalStorageProjectService implements IProjectServices {
         status: ProjetoEtapaStatus.Concluido,
         dataInicio: e.dataInicio ?? now,
         dataFim: e.dataFim ?? now,
-      } as tProjetoEtapaItem;
+      } as tProjetoEtapa;
     });
     const updated: tProjectPersisted = {
       ...all[idx],
@@ -503,7 +504,7 @@ export class LocalStorageProjectService implements IProjectServices {
     const all = getStoredProjects();
     const idx = all.findIndex((p) => p.id === projectId);
     if (idx === -1) throw new Error("Project not found");
-    const etapas = (all[idx].etapas ?? []) as tProjetoEtapaItem[];
+    const etapas = (all[idx].etapas ?? []) as tProjetoEtapa[];
     const now = new Date();
     const nextEtapas = etapas.map((e) => ({
       ...e,

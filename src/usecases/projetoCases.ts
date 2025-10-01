@@ -1,4 +1,4 @@
-import { tProjectCreateDto } from "@/@types/tProject";
+import { EtapaStatus, tProjectCreateDto } from "@/@types/tProject";
 import { IProjectServices } from "@/interfaces/IProjectServices";
 
 export async function create(
@@ -19,4 +19,12 @@ export async function findEquipe(
   idProjeto: number
 ) {
   return await projectService.findEquipe(idProjeto);
+}
+
+export async function findByProjetoEStatus(
+  projectService: IProjectServices,
+  idProjeto: number,
+  status: EtapaStatus
+) {
+  return await projectService.findByProjetoEStatus(idProjeto, status);
 }

@@ -6,7 +6,7 @@ import { projectService } from "@/services/LocalStorageProjectService";
 import { userService } from "@/services/LocalStorageUserService";
 import type {
   tProjectPersisted,
-  tProjetoEtapaItem,
+  tProjetoEtapa,
   tProjetoEtapa,
 } from "@/@types/tProject";
 import { ProjetoEtapa, ProjetoEtapaStatus } from "@/@types/tProject";
@@ -56,7 +56,7 @@ export default function ProjetoDetalhesWorkflowPage() {
   const projectId = params?.id as string | undefined;
 
   const [project, setProject] = useState<tProjectPersisted | null>(null);
-  const [etapas, setEtapas] = useState<tProjetoEtapaItem[]>([]);
+  const [etapas, setEtapas] = useState<tProjetoEtapa[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [updatingEtapa, setUpdatingEtapa] = useState<tProjetoEtapa | null>(
@@ -117,7 +117,7 @@ export default function ProjetoDetalhesWorkflowPage() {
   }, [projectId]);
 
   const etapasByEtapa = useMemo(() => {
-    const map = new Map<tProjetoEtapa, tProjetoEtapaItem>();
+    const map = new Map<tProjetoEtapa, tProjetoEtapa>();
     etapas.forEach((e) => map.set(e.etapa, e));
     return map;
   }, [etapas]);

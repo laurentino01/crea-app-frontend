@@ -52,40 +52,38 @@ export default function ProjetoDetalhesPage() {
       {/* Informações */}
 
       <div className="flex items-center mb-4">
-        {!loading && !error && project && (
-          <div className="ml-auto flex items-center gap-2">
-            {!editing ? (
+        <div className="ml-auto flex items-center gap-2">
+          {!editing ? (
+            <button
+              className="px-3 py-1.5 text-sm rounded-md border bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 cursor-pointer"
+              onClick={() => {
+                setSaveMsg(null);
+                setEditing(true);
+              }}
+            >
+              Editar
+            </button>
+          ) : (
+            <>
+              <button
+                className="px-3 py-1.5 text-sm rounded-md bg-fuchsia-900 text-white hover:bg-fuchsia-700 disabled:opacity-50 cursor-pointer"
+                disabled={saving}
+              >
+                {saving ? "Salvando…" : "Salvar"}
+              </button>
               <button
                 className="px-3 py-1.5 text-sm rounded-md border bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 cursor-pointer"
+                disabled={saving}
                 onClick={() => {
+                  setEditing(false);
                   setSaveMsg(null);
-                  setEditing(true);
                 }}
               >
-                Editar
+                Cancelar
               </button>
-            ) : (
-              <>
-                <button
-                  className="px-3 py-1.5 text-sm rounded-md bg-fuchsia-900 text-white hover:bg-fuchsia-700 disabled:opacity-50 cursor-pointer"
-                  disabled={saving}
-                >
-                  {saving ? "Salvando…" : "Salvar"}
-                </button>
-                <button
-                  className="px-3 py-1.5 text-sm rounded-md border bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 cursor-pointer"
-                  disabled={saving}
-                  onClick={() => {
-                    setEditing(false);
-                    setSaveMsg(null);
-                  }}
-                >
-                  Cancelar
-                </button>
-              </>
-            )}
-          </div>
-        )}
+            </>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
