@@ -4,18 +4,12 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-
 import ProgressBar from "@/components/ProgressBar";
 import ProjectEtapaBadge from "@/components/ProjectEtapaBadge";
 import ProjectCriticidadeBadge from "@/components/ProjectCriticidadeBadge";
 import ProjectPrazoBadge from "@/components/ProjectPrazoBadge";
-
 import { projectService } from "@/services/api/ProjetoService";
-import type {
-  tProject,
-  tProjetoEtapa,
-  tProjetoEtapaItem,
-} from "@/@types/tProject";
+import type { tProject, tProjetoEtapaItem } from "@/@types/tProject";
 import { EtapaStatus, ProjetoEtapa } from "@/@types/tProject";
 import DetailTabs from "@/components/DetailTabs";
 import { findById, findByProjetoEStatus } from "@/usecases/projetoCases";
@@ -29,36 +23,14 @@ enum eTabs {
   workflow = "workflow",
 }
 
-// Progresso baseado no status por etapa
-/* function etapasProgressPct(etapas: tProjetoEtapa[] | undefined): number {
-  if (!etapas || etapas.length === 0) return 0;
-  const allDescont = etapas.every(
-    (e) => e.status === ProjetoEtapaStatus.Descontinuado
-  );
-  // Se todas as etapas estão descontinuadas, progresso deve ser 0%
-  if (allDescont) return 0;
-  const valid = etapas.filter(
-    (e) => e.status !== ProjetoEtapaStatus.Descontinuado
-  );
-  if (valid.length === 0) return 0;
-  const done = valid.filter(
-    (e) => e.status === ProjetoEtapaStatus.Concluido
-  ).length;
-  return Math.round((done / valid.length) * 100);
-} */
-
 export default function projetoDetalhesLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   const { id } = useParams<{ id: string }>();
-
   const [project, setProject] = useState<tProject | null>(null);
-
   const [etapa, setEtapa] = useState<tProjetoEtapaItem>();
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [currentTab, setCurrentTab] = useState<eTabs>(eTabs.informacoes);
   const [progresso, setProgresso] = useState(0);
 
@@ -94,8 +66,6 @@ export default function projetoDetalhesLayout({
   useEffect(() => {
     findProjetoInfos();
     findEtapa();
-
-    console.log(progresso);
   }, []);
 
   return (

@@ -80,6 +80,7 @@ export enum EtapaStatus {
 
 export type tProjetoUsuarioDto = {
   usuario: number;
+  projeto: number;
 };
 
 export type tProjectCreateDto = {
@@ -149,3 +150,5 @@ export type tProject = {
 
   atualizadoPor: number;
 };
+
+export type tProjectUpdateDto = Partial<tProject>;

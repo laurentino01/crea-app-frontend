@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/useToast";
 import { authService } from "@/services/api/AuthService";
 import { userService } from "@/services/api/UserServices";
 import { fetchOne, update } from "@/usecases/userCases";
+import handleDataUpdate from "@/utils/handleDataUpdate";
 import { Eye, EyeOff, Mail, Shield, User } from "lucide-react";
 import { redirect, useParams } from "next/navigation";
 import { use, useEffect, useState } from "react";
@@ -29,34 +30,24 @@ export default function () {
   const senha = watch("password");
 
   const onSubmit = async (data: tUserUpdateDto) => {
-    const obj: tUserUpdateDto = {};
-    for (const [key, value] of Object.entries(data)) {
-      const valorAntigo = user[key as keyof typeof user];
-      const valorNovo = value;
+    const { id, ...rest } = user;
+    const dataUpdate = handleDataUpdate<tUserUpdateDto>(
+      data,
+      rest as tUserUpdateDto
+    );
 
-      if (valorNovo === "") {
-        continue;
-      }
-
-      if (valorNovo === valorAntigo) {
-        continue;
-      }
-
-      obj[key as keyof typeof data] = value as any;
-    }
-
-    const hasChanges = !!Object.keys(obj).length;
-
-    if (!hasChanges) {
+    if (dataUpdate.hasntChanges) {
       setEditando(false);
-      push({ type: "info", message: "Nada foi alterado :) " });
+      push({ type: "info", message: "Nada foi alterado." });
       return;
     }
 
-    obj["id"] = authService.getUserId();
-    obj["primeiroAcesso"] = authService.getUserData()?.primeiroLogin;
+    const newData = dataUpdate.data;
 
-    const response = await update(userService, obj);
+    newData.primeiroAcesso = authService.getUserData()?.primeiroLogin;
+    newData.id = Number(user.id);
+
+    const response = await update(userService, newData);
 
     if (response.res) {
       push({ type: "success", message: "Dados alterados com sucesso! :)" });

@@ -11,13 +11,15 @@ type Props = {
 
 function criticidadeLabel(c: tProjetoCriticidade): string {
   switch (c) {
-    case PrioridadeProjeto.Baixa:
+    case PrioridadeProjeto.BAIXA:
       return "Baixa";
-    case PrioridadeProjeto.Media:
+    case PrioridadeProjeto.MEDIA:
       return "Média";
-    case PrioridadeProjeto.Alta:
+    case PrioridadeProjeto.ALTA:
       return "Alta";
-    case PrioridadeProjeto.Urgente:
+    case PrioridadeProjeto.URGENTE:
+      return "Urgente";
+    case PrioridadeProjeto.CRITICO:
       return "Urgente";
     default:
       return String(c);
@@ -26,13 +28,15 @@ function criticidadeLabel(c: tProjetoCriticidade): string {
 
 function criticidadeClass(c: tProjetoCriticidade): string {
   switch (c) {
-    case PrioridadeProjeto.Baixa:
+    case PrioridadeProjeto.BAIXA:
       return "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300";
-    case PrioridadeProjeto.Media:
+    case PrioridadeProjeto.MEDIA:
       return "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300";
-    case PrioridadeProjeto.Alta:
+    case PrioridadeProjeto.ALTA:
       return "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300";
-    case PrioridadeProjeto.Urgente:
+    case PrioridadeProjeto.URGENTE:
+      return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300";
+    case PrioridadeProjeto.CRITICO:
       return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300";
     default:
       return "bg-neutral-100 text-neutral-800 dark:bg-white/5 dark:text-neutral-300";

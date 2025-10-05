@@ -4,6 +4,7 @@ import {
   tUsuarioEquipe,
   EtapaStatus,
   tProjetoEtapaItem,
+  tProjectUpdateDto,
 } from "../@types/tProject";
 
 export interface IProjectServices {
@@ -16,6 +17,7 @@ export interface IProjectServices {
     id: number,
     status: EtapaStatus
   ): Promise<tProjetoEtapaItem>;
+  updateInformacoes(params: tProjectUpdateDto): Promise<any>;
   /*   update(
     id: number,
     changes: Partial<Omit<tProjectPersisted, "id">>

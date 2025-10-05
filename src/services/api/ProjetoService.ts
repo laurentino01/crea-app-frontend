@@ -2,6 +2,7 @@ import {
   EtapaStatus,
   tProject,
   tProjectCreateDto,
+  tProjectUpdateDto,
   tProjetoEtapaItem,
   tUsuarioEquipe,
 } from "@/@types/tProject";
@@ -59,6 +60,19 @@ class ProjetoService implements IProjectServices {
         Authorization: `${this.token}`,
         "Content-Type": "application/json",
       },
+    });
+
+    return await res.json();
+  }
+
+  async updateInformacoes(params: tProjectUpdateDto) {
+    const res = await fetch(`${this.url}/projetos/informacoes`, {
+      method: "put",
+      headers: {
+        Authorization: `${this.token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(params),
     });
 
     return await res.json();
