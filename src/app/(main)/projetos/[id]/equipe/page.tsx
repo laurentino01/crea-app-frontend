@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 
 import { projectService } from "@/services/api/ProjetoService";
@@ -15,9 +15,14 @@ import type { tUser } from "@/@types/tUser";
 import Avatar from "@/components/Avatar";
 import SearchInput from "@/components/SearchInput";
 import { Plus, Trash } from "lucide-react";
-import { findEquipe } from "@/usecases/projetoCases";
+import {
+  addMembroEquipe,
+  findEquipe,
+  removeMembroEquipe,
+} from "@/usecases/projetoCases";
 import { fetchUsers } from "@/usecases/userCases";
 import { useForm } from "react-hook-form";
+import { useToast } from "@/hooks/useToast";
 
 export default function ProjetoDetalheEquipePage() {
   const params = useParams<{ id: string }>();
@@ -27,49 +32,87 @@ export default function ProjetoDetalheEquipePage() {
   // Equipe
   const [allUsers, setAllUsers] = useState<tUser[]>([]);
   const [equipe, setEquipe] = useState<tUsuarioEquipe[]>([]);
+  const { push } = useToast();
 
   const [teamSearch, setTeamSearch] = useState("");
-  const [listaEquipe, setListaEquipe] = useState<tProjetoUsuarioDto[]>([]);
   const [selectedUserToAdd, setSelectedUserToAdd] = useState<string>("");
-  const { register, handleSubmit, watch } = useForm();
+  const { register, handleSubmit } = useForm();
 
-  const usuarios = watch("usuarios");
+  const onDelete = async (data: any) => {
+    const res = await removeMembroEquipe(projectService, {
+      idProjeto: Number(params.id),
+      usuarios: data.usuarios,
+    });
+    if (res.statusCode === 500) {
+      push({
+        type: "error",
+        message: "Oops, algo deu errado. Tente novamente mais tarde",
+      });
+      return;
+    }
+
+    push({
+      type: "success",
+      message: "Usuários excluídos com sucesso! :)",
+    });
+    fetchEquipe();
+  };
+
+  const onAdd = async (data: any) => {
+    const res = await addMembroEquipe(projectService, {
+      projeto: Number(params.id),
+      usuario: data.novoUsuario,
+    });
+    if (res.statusCode === 500) {
+      push({
+        type: "error",
+        message: "Oops, algo deu errado. Tente novamente mais tarde",
+      });
+      return;
+    }
+
+    push({
+      type: "success",
+      message: "Usuários excluídos com sucesso! :)",
+    });
+    fetchEquipe();
+  };
 
   async function fetchEquipe() {
     const res = await findEquipe(projectService, +params.id);
     setEquipe(res);
   }
-  async function fetchUsuarios() {
-    const res = await fetchUsers(userService);
-    setAllUsers(res);
-  }
+  const fetchUsuarios = useCallback(async () => {
+    if (equipe) {
+      const res = await fetchUsers(userService);
+      let i = 0;
+      let x = 0;
+      let newRes: any[] = [];
 
-  function handleListaEquipe() {
-    usuarios.map((data: string) => {
-      const old = usuarios.find((usu: any) => usu.usuario === +data);
+      while (i <= res.length && x <= equipe.length) {
+        if (res[i].id !== equipe[x].id) {
+          newRes.push(res[i]);
+        }
 
-      if (old) {
-        const newList = usuarios.filter((usu: any) => usu.usuario !== +data);
-        setListaEquipe(newList);
-      } else {
-        const newUser: tProjetoUsuarioDto = {
-          usuario: +data,
-          projeto: +params.id,
-        };
-
-        setListaEquipe([...listaEquipe, newUser]);
+        if (x == equipe.length) {
+          i++;
+          x = 0;
+        } else {
+          x++;
+        }
       }
-    });
-  }
+
+      setAllUsers(newRes);
+      console.log(newRes);
+    }
+  }, [equipe]);
+
   useEffect(() => {
     fetchEquipe();
-    fetchUsuarios();
   }, []);
-
   useEffect(() => {
-    handleListaEquipe();
-    console.log(listaEquipe);
-  }, [usuarios]);
+    fetchUsuarios();
+  }, [equipe]);
 
   const equipeIds = useMemo(
     () => new Set((project?.equipe ?? []).map((m) => m.usuario)),
@@ -94,7 +137,7 @@ export default function ProjetoDetalheEquipePage() {
           {equipe.length || 0} membros
         </span>
       </div>
-      <form onSubmit={handleSubmit(console.log)}>
+      <form>
         {/* Adicionar membro */}
         <div className="border  border-neutral-200 dark:border-neutral-800 rounded-lg p-3 mb-4">
           <div className="text-sm font-medium text-neutral-700 dark:text-neutral-200 mb-2">
@@ -113,6 +156,7 @@ export default function ProjetoDetalheEquipePage() {
                   />
                   <select
                     value={selectedUserToAdd}
+                    {...register("novoUsuario")}
                     onChange={(e) => setSelectedUserToAdd(e.target.value)}
                     className="rounded-full border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-1"
                   >
@@ -129,11 +173,15 @@ export default function ProjetoDetalheEquipePage() {
                   </select>
                 </div>
                 <div className="flex sm:justify-end gap-4">
-                  <button className="flex gap-3 items-center px-3 py-1 rounded-md bg-fuchsia-900 text-white hover:bg-fuchsia-700 disabled:opacity-50 cursor-pointer">
+                  <button
+                    onClick={handleSubmit(onAdd)}
+                    className="flex gap-3 items-center px-3 py-1 rounded-md bg-fuchsia-900 text-white hover:bg-fuchsia-700 disabled:opacity-50 cursor-pointer"
+                  >
                     Adicionar
                     <Plus size={16} />
                   </button>
                   <button
+                    onClick={handleSubmit(onDelete)}
                     type="submit"
                     className="flex gap-3 items-center px-3 py-1.5 text-sm rounded-md border bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 cursor-pointer"
                   >

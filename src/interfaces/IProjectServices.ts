@@ -18,6 +18,11 @@ export interface IProjectServices {
     status: EtapaStatus
   ): Promise<tProjetoEtapaItem>;
   updateInformacoes(params: tProjectUpdateDto): Promise<any>;
+  removeMembroEquipe(params: {
+    idProjeto: number;
+    usuarios: string[];
+  }): Promise<any>;
+  addMembroEquipe(params: { projeto: number; usuario: string }): Promise<any>;
   /*   update(
     id: number,
     changes: Partial<Omit<tProjectPersisted, "id">>

@@ -77,6 +77,30 @@ class ProjetoService implements IProjectServices {
 
     return await res.json();
   }
+  async removeMembroEquipe(params: { idProjeto: number; usuarios: string[] }) {
+    const res = await fetch(`${this.url}/projeto-usuario`, {
+      method: "delete",
+      headers: {
+        Authorization: `${this.token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(params),
+    });
+
+    return await res.json();
+  }
+  async addMembroEquipe(params: { projeto: number; usuario: string }) {
+    const res = await fetch(`${this.url}/projeto-usuario`, {
+      method: "post",
+      headers: {
+        Authorization: `${this.token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(params),
+    });
+
+    return await res.json();
+  }
 }
 
 export const projectService = new ProjetoService();

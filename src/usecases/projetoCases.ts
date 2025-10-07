@@ -39,3 +39,23 @@ export async function updateInformacoes(
 ) {
   return await projectService.updateInformacoes(params);
 }
+
+export async function removeMembroEquipe(
+  projectService: IProjectServices,
+  params: {
+    idProjeto: number;
+    usuarios: string[];
+  }
+) {
+  return await projectService.removeMembroEquipe(params);
+}
+
+export async function addMembroEquipe(
+  projectService: IProjectServices,
+  params: {
+    projeto: number;
+    usuario: string;
+  }
+) {
+  return await projectService.addMembroEquipe(params);
+}
